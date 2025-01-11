@@ -12,10 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('portfolios', function (Blueprint $table) {
-            $table->primary(['jelentkezo_id', 'portfolio_url']);
+            $table->id(); 
             $table->foreignId('jelentkezo_id')->references('id')->on('jelentkezos');
-            $table->string('portfolio_url')->unique();
+            $table->string('portfolio_url');
+            $table->foreignId('szak_id')->references('id')->on('szaks');
             $table->timestamps();
+        
+            // Egyedi kombinációk létrehozása (indexek)
+            $table->unique(['jelentkezo_id', 'szak_id', 'portfolio_url']);
         });
     }
 

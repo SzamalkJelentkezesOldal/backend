@@ -7,18 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class Portfolio extends Model
 {
+
+    // protected $primaryKey = ['jelentkezo_id', 'portfolio_url', 'szak_id'];
     /** @use HasFactory<\Database\Factories\PortfolioFactory> */
     use HasFactory;
     protected $fillable = [
-        'jelentkezes_id',
+        'jelentkezo_id',
         'portfolio_url',
+        'szak_id'
     ];
-
-    protected function setKeysForSaveQuery($query)
-    {
-        $query
-            ->where('jelentkezes_id', '=', $this->getAttribute('jelentkezes_id'));
-
-        return $query;
-    }
 }
