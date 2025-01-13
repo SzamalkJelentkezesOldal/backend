@@ -13,6 +13,7 @@ class Jelentkezo extends Model
     protected $fillable = [
         'nev',
         'email',
-        'tel'
+        'tel',
+        'token'
     ];
 }

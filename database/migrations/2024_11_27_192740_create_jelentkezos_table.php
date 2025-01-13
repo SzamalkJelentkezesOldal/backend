@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string("nev");
             $table->string("email");
             $table->string("tel");
+            $table->string("token");
             $table->timestamps();
         });
     }

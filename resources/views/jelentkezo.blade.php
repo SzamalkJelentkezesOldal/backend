@@ -6,9 +6,9 @@
     <title>Jelentkezés</title>
 </head>
 <body>
-    <h1>Kedves {{$name}}!</h1>
+    <h1>Tisztelt {{$name}}!</h1>
 
-    <p>Ez egy teszt email....</p>
+    <p>Regisztrálj, hogy folytathasd a beiratkozást!</p>
 
     <h4><a href={{$url}} target="_blank">REGISZTRÁCIÓ</a></h4>
 </body>

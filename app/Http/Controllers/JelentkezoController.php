@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\JelentkezoMail;
 use App\Models\Jelentkezes;
 use App\Models\Jelentkezo;
 use App\Models\Portfolio;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class JelentkezoController extends Controller
 {
@@ -35,12 +38,19 @@ class JelentkezoController extends Controller
     
     
         try {
+            $token = Str::random(40);
+
             // jelentkezobe
             $jelentkezo = new Jelentkezo();
             $jelentkezo->nev = $request->jelentkezo['nev'];
             $jelentkezo->email = $request->jelentkezo['email'];
             $jelentkezo->tel = $request->jelentkezo['tel'];
+            $jelentkezo->token = $token;
             $jelentkezo->save();
+
+            $regisztraciosLink = url("http://localhost:3000/register/{$token}");
+
+            Mail::to($request->jelentkezo['email'])->send(new JelentkezoMail($request->jelentkezo['nev'], $regisztraciosLink));
 
             //jelentkezesbe
             foreach ($request->jelentkezes['kivalasztottSzakok'] as $szakId) {
