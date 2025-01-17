@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\JelentkezoRequest;
 use App\Mail\JelentkezoMail;
 use App\Models\Jelentkezes;
 use App\Models\Jelentkezo;
@@ -14,22 +15,9 @@ use Illuminate\Support\Str;
 
 class JelentkezoController extends Controller
 {
-    public function postJelentkezoJelentkezesPortfolio(Request $request) {
-        // Validációs szabályok
-        $validation = Validator::make($request->all(), [
-            'jelentkezo' => 'required|array',
-            'jelentkezo.nev' => 'required|string|max:255',
-            'jelentkezo.email' => 'required|email|max:255|unique:jelentkezos,email',
-            'jelentkezo.tel' => 'required|string|max:15',
-            'jelentkezes' => 'required|array',
-            'jelentkezes.kivalasztottSzakok' => 'required|array|min:1',
-            'jelentkezes.kivalasztottSzakok.*' => 'required|integer|exists:szaks,id',
-            'portfolio.portfolioSzakok' => 'nullable|array',
-            'portfolio.portfolioSzakok.*.szak_id' => 'integer|exists:szaks,id',
-            'portfolio.portfolioSzakok.*.portfolio_url' => 'url',
-
-        ]);
-    
+    public function postJelentkezoJelentkezesPortfolio(JelentkezoRequest $request) {
+        $validation = Validator::make($request->all(), $request->rules());
+       
         if ($validation->fails()) {
             return response()->json([
                 'errors' => $validation->errors()
@@ -73,7 +61,7 @@ class JelentkezoController extends Controller
             }
         
             return response()->json([
-                'message' => 'Jelentkezés sikeresen mentve.',
+                'message' => 'Sikeres jelentkezés!',
                 'data' => $jelentkezo
             ], 201);  
         } catch (\Exception $e) {
