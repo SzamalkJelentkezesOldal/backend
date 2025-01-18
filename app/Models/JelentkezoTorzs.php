@@ -7,23 +7,22 @@ use Illuminate\Database\Eloquent\Model;
 
 class JelentkezoTorzs extends Model
 {
+    protected $primaryKey = 'jelentkezo_id';
+    public $incrementing = false;
     /** @use HasFactory<\Database\Factories\JelentkezoTorzsFactory> */
     use HasFactory;
     protected $fillable = [
-        'jelentkezo_:id',
+        'jelentkezo_id',
         'vezeteknev',
         'keresztnev',
-        'adoszam',
-        'szemelyi_szam',
+        'adoazonosito',
         'lakcim',
         'taj_szam',
-        'nem',
         'anyja_neve',
         'szuletesi_hely',
         'szuletesi_nev',
         'szuletesi_datum',
         'allampolgarsag',
-        'elozo_iskola_nev',
-        'elozo_iskola_hely'
+        'szulo_elerhetoseg'
     ];
 }
