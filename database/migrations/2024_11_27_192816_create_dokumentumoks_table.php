@@ -14,13 +14,8 @@ return new class extends Migration
         Schema::create('dokumentumoks', function (Blueprint $table) {
             $table->foreignId('jelentkezo_id')->references('id')->on('jelentkezos');
             $table->primary('jelentkezo_id');
-            $table->string('adoszam_foto')->unique();
-            $table->string('taj_szam_foto')->unique();
-            $table->string('szemelyi_foto_elol')->unique();
-            $table->string('szemelyi_foto_hatul')->unique();
-            $table->string('lakcim_foto_elol')->unique();
-            $table->string('erettsegi_biz')->unique();
-            $table->string('tanulmanyi_fotok')->unique()->nullable();
+            $table->foreignId('dokumentum_id')->references('id')->on('dokumentum_tipuses');
+            $table->string('dokumentum_url')->unique();
             $table->timestamps();
         });
     }

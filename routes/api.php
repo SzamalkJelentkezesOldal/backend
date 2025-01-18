@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DokumentumTipusController;
 use App\Http\Controllers\JelentkezoController;
 use App\Http\Controllers\SzakController;
 use Illuminate\Http\Request;
@@ -11,5 +12,7 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
 
 
 Route::get('/szakok',[SzakController::class, 'getSzakok']);
+Route::get('/dokumentum-tipusok',[DokumentumTipusController::class, 'getDokumentumTipusok']);
+
 
 Route::post("/ujJelentkezo",[JelentkezoController::class, 'postJelentkezoJelentkezesPortfolio']);

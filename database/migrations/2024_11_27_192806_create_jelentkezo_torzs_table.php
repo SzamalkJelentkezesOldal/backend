@@ -24,7 +24,6 @@ return new class extends Migration
             $table->string('szuletesi_nev');
             $table->date('szuletesi_datum');
             $table->string('allampolgarsag');
-            $table->string('allampolgarsag');
             $table->string('szulo_elerhetoseg');
             $table->timestamps();
         });
