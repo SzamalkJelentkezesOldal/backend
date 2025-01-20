@@ -24,6 +24,8 @@ class Jelentkezes extends Model
 
         return $query;
     }
+
+    // jelentkezes modelba
     public function jelentkezo(){
         return $this->belongsTo(Jelentkezo::class,'jelentkezo_id','id');
     }

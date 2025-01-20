@@ -8,7 +8,7 @@ class JelentkezesController extends Controller
 {
     public function countJelentkezesSzama(String $id)
     {
-        $jelentkezo = Jelentkezo::with('jelentkezesek')->findOrFail($id);
+        $jelentkezo = Jelentkezo::with('jelentkezesek');
 
         // Jelentkezések számának meghatározása
         $szakokSzama = $jelentkezo->jelentkezesek->count();

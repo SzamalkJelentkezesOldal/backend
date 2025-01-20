@@ -17,10 +17,13 @@ class Jelentkezo extends Model
         'token'
     ];
 
+    // jelentkezo modelba 
     public function jelentkezesek()
     {
         return $this->hasMany(Jelentkezes::class, 'jelentkezo_id', 'id');
     }
+
+    // jelentkezo modelba
     public function torzsadatok()
     {
         return $this->hasOne(JelentkezoTorzs::class, 'jelentkezo_id', 'id');

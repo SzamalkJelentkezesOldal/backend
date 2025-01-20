@@ -92,7 +92,6 @@ class JelentkezoController extends Controller
                 'szuletesi_datum',
                 'allampolgarsag',
                 'anyja_neve',
-                'szulo_elerhetoseg',
             ]);
         }])
             ->select(['id', 'nev', 'email', 'tel', 'token'])

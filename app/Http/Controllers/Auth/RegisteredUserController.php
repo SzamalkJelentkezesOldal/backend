@@ -22,16 +22,14 @@ class RegisteredUserController extends Controller
     public function store(Request $request, $token): Response
     {
         $request->validate([
-            // 'name' => ['required', 'string', 'max:255'],
-            // 'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        $registration = DB::table('jelentkezos')->where('token', $token)->first();
+        $regisztracio = DB::table('jelentkezos')->where('token', $token)->first();
 
         $user = User::create([
-            'name' => $registration->nev,
-            'email' => $registration->email,
+            'name' => $regisztracio->nev,
+            'email' => $regisztracio->email,
             'password' => Hash::make($request->string('password')),
         ]);
 

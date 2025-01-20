@@ -9,7 +9,7 @@ class SzakController extends Controller
 {
     public function getSzakok() {
         $szakok = DB::table('szaks')
-        ->select('id','elnevezes', 'portfolio')
+        ->select('id','elnevezes', 'portfolio', 'nappali')
         ->get();
 
         return $szakok;

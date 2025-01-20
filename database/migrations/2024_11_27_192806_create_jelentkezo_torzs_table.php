@@ -17,15 +17,14 @@ return new class extends Migration
             $table->primary('jelentkezo_id');
             $table->string('vezeteknev');
             $table->string('keresztnev');
-            $table->string('adoazonosito')->unique();
+            $table->string('adoazonosito')->unique()->nullable();
             $table->string('lakcim');
-            $table->string('taj_szam')->unique();
+            $table->string('taj_szam')->unique()->nullable();
             $table->string('szuletesi_hely');
-            $table->string('szuletesi_nev');
+            $table->string('szuletesi_nev')->nullable();
             $table->date('szuletesi_datum');
             $table->string('allampolgarsag');
             $table->string('anyja_neve');
-            $table->string('szulo_elerhetoseg')->nullable();
             $table->timestamps();
         });
 
@@ -41,7 +40,6 @@ return new class extends Migration
             'szuletesi_datum' => '2006-07-15',
             'allampolgarsag' => 'magyar',
             'anyja_neve' => 'Nagy Ilona',
-            'szulo_elerhetoseg' => '06201234567', // Ez opcionális
         ]);
     }
 

@@ -23,6 +23,5 @@ class JelentkezoTorzs extends Model
         'szuletesi_nev',
         'szuletesi_datum',
         'allampolgarsag',
-        'szulo_elerhetoseg'
     ];
 }
