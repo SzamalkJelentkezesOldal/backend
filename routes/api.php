@@ -3,6 +3,7 @@
 use App\Http\Controllers\DokumentumTipusController;
 use App\Http\Controllers\JelentkezoController;
 use App\Http\Controllers\SzakController;
+use App\Http\Controllers\UgyintezoController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -16,3 +17,7 @@ Route::get('/dokumentum-tipusok',[DokumentumTipusController::class, 'getDokument
 
 
 Route::post("/ujJelentkezo",[JelentkezoController::class, 'postJelentkezoJelentkezesPortfolio']);
+
+
+//Ugyintezo 
+Route::post('/ugyintezo', [UgyintezoController::class, 'postUgyintezo']);
