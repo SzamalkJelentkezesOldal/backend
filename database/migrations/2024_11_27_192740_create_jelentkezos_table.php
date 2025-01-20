@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Jelentkezo;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -19,6 +20,12 @@ return new class extends Migration
             $table->string("token");
             $table->timestamps();
         });
+        Jelentkezo::create([
+            "nev"=> "Kovács János",
+            "email"=>"jani@gmail.com",
+            "tel"=>'06202020200',
+            "token"=>'agvdfsbgfndjbsgfjd',
+        ]);
     }
 
     /**

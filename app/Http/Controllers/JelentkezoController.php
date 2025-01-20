@@ -15,16 +15,17 @@ use Illuminate\Support\Str;
 
 class JelentkezoController extends Controller
 {
-    public function postJelentkezoJelentkezesPortfolio(JelentkezoRequest $request) {
+    public function postJelentkezoJelentkezesPortfolio(JelentkezoRequest $request)
+    {
         $validation = Validator::make($request->all(), $request->rules());
-       
+
         if ($validation->fails()) {
             return response()->json([
                 'errors' => $validation->errors()
-            ], 422); 
+            ], 422);
         }
-    
-    
+
+
         try {
             $token = Str::random(40);
 
@@ -59,16 +60,44 @@ class JelentkezoController extends Controller
                     $portfolio->save();
                 }
             }
-        
+
             return response()->json([
                 'message' => 'Sikeres jelentkezés!',
                 'data' => $jelentkezo
-            ], 201);  
+            ], 201);
         } catch (\Exception $e) {
             Log::error('Hiba történt: ' . $e->getMessage());
             return response()->json([
                 'error' => 'Belső hiba történt: ' . $e->getMessage(),
             ], 500);
         }
+    }
+    public function index()
+    {
+        return Jelentkezo::all();
+    }
+
+    public function getJelentkezoAdatok($id)
+    {
+        $result = Jelentkezo::with(['torzsadatok' => function ($query) {
+            $query->select([
+                'jelentkezo_id',
+                'vezeteknev',
+                'keresztnev',
+                'adoazonosito',
+                'lakcim',
+                'taj_szam',
+                'szuletesi_hely',
+                'szuletesi_nev',
+                'szuletesi_datum',
+                'allampolgarsag',
+                'anyja_neve',
+                'szulo_elerhetoseg',
+            ]);
+        }])
+            ->select(['id', 'nev', 'email', 'tel', 'token'])
+            ->find($id);
+
+        return response()->json($result);
     }
 }

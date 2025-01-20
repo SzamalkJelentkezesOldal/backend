@@ -26,4 +26,15 @@ class UgyintezoController extends Controller
 
         return response()->json($ujUgyintezo);
     }
+    public function ugyintezoDelete(string $id)
+    {
+        Ugyintezo::find($id)->delete();
+    }
+
+    public function ugyintezoPatch(Request $request, string $id)
+    {
+        $record = Ugyintezo::find($id);  
+        $record->fill($request->all());
+        $record->save();
+    }
 }
