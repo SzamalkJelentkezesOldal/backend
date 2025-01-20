@@ -16,64 +16,79 @@ return new class extends Migration
             $table->id();
             $table->string("elnevezes");
             $table->boolean("portfolio");
+            $table->boolean('nappali');
             $table->timestamps();
         });
 
         Szak::create([
-            'elnevezes' => 'N | Informatikai rendszer- és alkalmazás-üzemeltető technikus',
-            'portfolio' => false
+            'elnevezes' => 'Informatikai rendszer- és alkalmazás-üzemeltető technikus',
+            'portfolio' => false,
+            'nappali' => true
         ]);
         Szak::create([
-            'elnevezes' => 'N | Szoftverfejlesztő és tesztelő',
-            'portfolio' => false
+            'elnevezes' => 'Szoftverfejlesztő és tesztelő',
+            'portfolio' => false,
+            'nappali' => true
         ]);
         Szak::create([
-            'elnevezes' => 'N | Dekoratőr',
-            'portfolio' => false
+            'elnevezes' => 'Dekoratőr',
+            'portfolio' => false,
+            'nappali' => true
         ]);
         Szak::create([
-            'elnevezes' => 'N | Divat-, jelmez- és díszlettervező (Divattervező)',
-            'portfolio' => false
+            'elnevezes' => 'Divat-, jelmez- és díszlettervező (Divattervező)',
+            'portfolio' => false,
+            'nappali' => true
         ]);
         Szak::create([
-            'elnevezes' => 'N | Fotográfus (Kreatív fotográfus)',
-            'portfolio' => true
+            'elnevezes' => 'Fotográfus (Kreatív fotográfus)',
+            'portfolio' => true,
+            'nappali' => true
         ]);
         Szak::create([
-            'elnevezes' => 'N | Grafikus',
-            'portfolio' => true
+            'elnevezes' => 'Grafikus',
+            'portfolio' => true,
+            'nappali' => true
         ]);
         Szak::create([
-            'elnevezes' => 'N | Mozgókép- és animációkészítő',
-            'portfolio' => true
+            'elnevezes' => 'Mozgókép- és animációkészítő',
+            'portfolio' => true,
+            'nappali' => true
         ]);
         Szak::create([
-            'elnevezes' => 'E | Informatikai rendszer- és alkalmazás-üzemeltető technikus',
-            'portfolio' => false
+            'elnevezes' => 'Informatikai rendszer- és alkalmazás-üzemeltető technikus',
+            'portfolio' => false,
+            'nappali' => false
         ]);
         Szak::create([
-            'elnevezes' => 'E | Szoftverfejlesztő és tesztelő',
-            'portfolio' => false
+            'elnevezes' => 'Szoftverfejlesztő és tesztelő',
+            'portfolio' => false,
+            'nappali' => false
         ]);
         Szak::create([
-            'elnevezes' => 'E | Dekoratőr',
-            'portfolio' => false
+            'elnevezes' => 'Dekoratőr',
+            'portfolio' => false,
+            'nappali' => false
         ]);
         Szak::create([
-            'elnevezes' => 'E | Divat-, jelmez- és díszlettervező (Divattervező)',
-            'portfolio' => false
+            'elnevezes' => 'Divat-, jelmez- és díszlettervező (Divattervező)',
+            'portfolio' => false,
+            'nappali' => false
         ]);
         Szak::create([
-            'elnevezes' => 'E | Fotográfus (Kreatív fotográfus)',
-            'portfolio' => true
+            'elnevezes' => 'Fotográfus (Kreatív fotográfus)',
+            'portfolio' => true,
+            'nappali' => false
         ]);
         Szak::create([
-            'elnevezes' => 'E | Grafikus',
-            'portfolio' => true
+            'elnevezes' => 'Grafikus',
+            'portfolio' => true,
+            'nappali' => false
         ]);
         Szak::create([
             'elnevezes' => 'E | Mozgókép- és animációkészítő',
-            'portfolio' => true
+            'portfolio' => true,
+            'nappali' => false
         ]);
     }
 
