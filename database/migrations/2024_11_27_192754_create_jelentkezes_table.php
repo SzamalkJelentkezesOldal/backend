@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Jelentkezes;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -18,6 +19,11 @@ return new class extends Migration
             $table->string('allapot');
             $table->timestamps();
         });
+        Jelentkezes::create([
+            "szak_id"=>1,
+            "jelentkezo_id"=>1,
+            "allapot"=>"Eldöntésre vár"
+        ]);
     }
 
     /**

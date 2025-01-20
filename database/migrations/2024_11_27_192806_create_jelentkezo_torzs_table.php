@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\JelentkezoTorzs;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -19,14 +20,29 @@ return new class extends Migration
             $table->string('adoazonosito')->unique();
             $table->string('lakcim');
             $table->string('taj_szam')->unique();
-            $table->string('anyja_neve');
             $table->string('szuletesi_hely');
             $table->string('szuletesi_nev');
             $table->date('szuletesi_datum');
             $table->string('allampolgarsag');
-            $table->string('szulo_elerhetoseg');
+            $table->string('anyja_neve');
+            $table->string('szulo_elerhetoseg')->nullable();
             $table->timestamps();
         });
+
+        JelentkezoTorzs::create([
+            'jelentkezo_id' => 1, // A megadott jelentkezo_id
+            'vezeteknev' => 'Kovács',
+            'keresztnev' => 'János',
+            'adoazonosito' => '1234567890',
+            'lakcim' => 'Budapest, Fő utca 1.',
+            'taj_szam' => '987654321',
+            'szuletesi_hely' => 'Debrecen',
+            'szuletesi_nev' => 'Kovács János',
+            'szuletesi_datum' => '2006-07-15',
+            'allampolgarsag' => 'magyar',
+            'anyja_neve' => 'Nagy Ilona',
+            'szulo_elerhetoseg' => '06201234567', // Ez opcionális
+        ]);
     }
 
     /**

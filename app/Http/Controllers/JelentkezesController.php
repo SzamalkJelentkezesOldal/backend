@@ -2,11 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\Jelentkezo;
 
 class JelentkezesController extends Controller
 {
-    public function postJelentkezes(Request $jelentkezes) {
-        
+    public function countJelentkezesSzama(String $id)
+    {
+        $jelentkezo = Jelentkezo::with('jelentkezesek')->findOrFail($id);
+
+        // Jelentkezések számának meghatározása
+        $szakokSzama = $jelentkezo->jelentkezesek->count();
+
+        return response()->json([
+            'jelentkezo_id' => $id,
+            'jelentkezesek_szama' => $szakokSzama
+        ]);
     }
 }
