@@ -26,7 +26,17 @@ class SzakController extends Controller
         return $result;
     }
 
-
+    public function jelentkezokSzamaSzakra(String $szak){
+        //Ki az aki paraméterben kapott szakra jelentkezett
+        $result = DB::table('szaks as sz')
+            ->join('jelentkezes as j', 'sz.id', '=', 'j.szak_id')
+            ->join('jelentkezos as jo', 'j.jelentkezo_id', '=', 'jo.id')
+            ->selectRaw('sz.elnevezes, COUNT(*) as ennyien ')
+            ->where('sz.elnevezes', '=',$szak)
+            ->groupBy('sz.id')
+            ->get();
+        return $result;
+    }
 
 
 

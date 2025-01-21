@@ -50,10 +50,14 @@ Route::middleware(['auth:sanctum', Master::class])
     });
     //kik jelentkeztek arra a szakra
     Route::get("/szakra-jelentkezett/{szak}", [SzakController::class, 'getJelentkezokSzakra']);
+    //hanyan jelentkeztek arra a szakra
+    Route::get("/jelentkezok-szama/{szak}", [SzakController::class, 'jelentkezokSzamaSzakra']);
     //csak nappali tagozatra jelentkeztek
     Route::get("/nappali-jelentkezok", [JelentkezoController::class, 'nappaliJelentkezok']);
-    //csak nappali tagozatra jelentkeztek
+    //csak esti tagozatra jelentkeztek
     Route::get("/esti-jelentkezok", [JelentkezoController::class, 'estiJelentkezok']);
+    //csak bizonyos tagozatra jelentkeztek
+    Route::get("/tagozat-jelentkezok/{szam}", [JelentkezoController::class, 'csakEgyTagozatraJelentkezett']);
     //hány jelentkezőnek van elfogadva a státusza
     Route::get("/statusz-elfogadva", [JelentkezesController::class, 'elfogadottakSzakonkent']);
 
