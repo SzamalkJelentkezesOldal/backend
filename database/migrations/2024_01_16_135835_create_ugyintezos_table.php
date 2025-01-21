@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('nev');
             $table->string('email')->unique();
             $table->string('jelszo');
+            $table->string('jelszoMegerosites');
             $table->boolean('master')->default(false);
             $table->timestamps();
         });
