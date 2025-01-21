@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->tinyInteger('role')->default(0);
             $table->rememberToken();
             $table->timestamps();
         });
@@ -38,9 +39,16 @@ return new class extends Migration
         });
 
         User::create([
-            'name' => 'Kovács János', // A név mező
-            'email' => 'jani@gmail.com', // Egyedi e-mail
-            'password' => bcrypt('titkosjelszo'), // A jelszót bcrypt-tel titkosítjuk
+            'name' => 'Kovács János', 
+            'email' => 'jani@gmail.com', 
+            'password' => bcrypt('asdasdasd'), 
+        ]);
+
+        User::create([
+            'name' => 'Ügyintéző', 
+            'email' => 'admin@admin.com', 
+            'password' => bcrypt('asdasdasd'),
+            'role' => 1,
         ]);
     }
 

@@ -86,7 +86,7 @@ return new class extends Migration
             'nappali' => false
         ]);
         Szak::create([
-            'elnevezes' => 'E | Mozgókép- és animációkészítő',
+            'elnevezes' => 'Mozgókép- és animációkészítő',
             'portfolio' => true,
             'nappali' => false
         ]);
