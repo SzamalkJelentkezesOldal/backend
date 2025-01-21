@@ -14,6 +14,7 @@ class UgyintezoController extends Controller
             'nev' => 'required|string|max:255',
             'email' => 'required|email|unique:ugyintezos,email',
             'jelszo' => 'required|string|min:6',
+            'jelszoMegerosites' => 'required|same:jelszo',
             'master' => 'boolean',
         ]);
 
@@ -21,6 +22,7 @@ class UgyintezoController extends Controller
             'nev' => $ellenorzottAdatok['nev'],
             'email' => $ellenorzottAdatok['email'],
             'jelszo' => $ellenorzottAdatok['jelszo'], 
+            'jelszoMegerosites' => $ellenorzottAdatok['jelszo'],
             'master' => $ellenorzottAdatok['master'] ?? false,
         ]);
 
