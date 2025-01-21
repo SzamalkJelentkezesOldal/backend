@@ -16,13 +16,13 @@ return new class extends Migration
             $table->primary(['szak_id', 'jelentkezo_id']);
             $table->foreignId('jelentkezo_id')->references('id')->on('jelentkezos');
             $table->foreignId('szak_id')->references('id')->on('szaks');
-            $table->string('allapot');
+            $table->foreignId('allapot')->references('id')->on('allapotszotars');
             $table->timestamps();
         });
         Jelentkezes::create([
             "szak_id"=>1,
             "jelentkezo_id"=>1,
-            "allapot"=>"Eldöntésre vár"
+            "allapot"=>2
         ]);
         /* Jelentkezes::create([
             "szak_id"=>9,

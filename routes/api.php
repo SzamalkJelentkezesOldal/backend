@@ -31,8 +31,12 @@ Route::middleware(['auth:sanctum'])
 // Ügyintéző 
 Route::middleware(['auth:sanctum', Ugyintezo::class])
     ->group(function () {
+        //jelentkezők alapadatainak kilistázása
         Route::get("/jelentkezok", [JelentkezoController::class, 'index']);
+        //jelentkezes állapotának módosítása
     });
+    Route::post('/allapot-valtozas', [JelentkezesController::class, 'allapotValtozas']);
+
 
 
 // Master
