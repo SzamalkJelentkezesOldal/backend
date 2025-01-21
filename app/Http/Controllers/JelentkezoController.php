@@ -137,4 +137,22 @@ class JelentkezoController extends Controller
 
         return $jelentkezok;
     }
+    public function csakEgyTagozatraJelentkezett(int $szam)
+    {
+        // Lekérdezés a nappali szakokra jelentkezettekről
+        
+        $jelentkezok = DB::table('jelentkezos')
+            ->whereNotExists(function ($query) use ($szam) {
+                $query->select(DB::raw(1))
+                    ->from('jelentkezes')
+                    ->join('szaks', 'jelentkezes.szak_id', '=', 'szaks.id')
+                    ->whereColumn('jelentkezes.jelentkezo_id', 'jelentkezos.id')
+                    ->where('szaks.nappali', '=', $szam); // Ha van nem-nappali jelentkezés, kizárjuk
+            })
+            ->select('jelentkezos.nev', 'jelentkezos.email')
+            ->distinct()
+            ->get();
+
+        return $jelentkezok;
+    }
 }
