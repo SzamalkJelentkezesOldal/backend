@@ -24,6 +24,11 @@ return new class extends Migration
             "jelentkezo_id"=>1,
             "allapot"=>"Eldöntésre vár"
         ]);
+        /* Jelentkezes::create([
+            "szak_id"=>9,
+            "jelentkezo_id"=>1,
+            "allapot"=>"Eldöntésre vár"
+        ]); */
     }
 
     /**

@@ -8,6 +8,7 @@ use App\Models\Jelentkezes;
 use App\Models\Jelentkezo;
 use App\Models\Portfolio;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
@@ -98,5 +99,42 @@ class JelentkezoController extends Controller
             ->find($id);
 
         return response()->json($result);
+    }
+
+    public function nappaliJelentkezok()
+    {
+        // Lekérdezés a nappali szakokra jelentkezettekről
+        
+        $jelentkezok = DB::table('jelentkezos')
+            ->whereNotExists(function ($query) {
+                $query->select(DB::raw(1))
+                    ->from('jelentkezes')
+                    ->join('szaks', 'jelentkezes.szak_id', '=', 'szaks.id')
+                    ->whereColumn('jelentkezes.jelentkezo_id', 'jelentkezos.id')
+                    ->where('szaks.nappali', '=', 0); // Ha van nem-nappali jelentkezés, kizárjuk
+            })
+            ->select('jelentkezos.nev', 'jelentkezos.email')
+            ->distinct()
+            ->get();
+
+        return $jelentkezok;
+    }
+    public function estiJelentkezok()
+    {
+        // Lekérdezés a nappali szakokra jelentkezettekről
+        
+        $jelentkezok = DB::table('jelentkezos')
+            ->whereNotExists(function ($query) {
+                $query->select(DB::raw(1))
+                    ->from('jelentkezes')
+                    ->join('szaks', 'jelentkezes.szak_id', '=', 'szaks.id')
+                    ->whereColumn('jelentkezes.jelentkezo_id', 'jelentkezos.id')
+                    ->where('szaks.nappali', '=', 1); // Ha van nem-nappali jelentkezés, kizárjuk
+            })
+            ->select('jelentkezos.nev', 'jelentkezos.email')
+            ->distinct()
+            ->get();
+
+        return $jelentkezok;
     }
 }
