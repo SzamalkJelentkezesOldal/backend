@@ -44,8 +44,25 @@ Route::middleware(['auth:sanctum', Master::class])
         Route::delete('/delete-ugyintezo/{id}', [UgyintezoController::class, 'ugyintezoDelete']);
         //Ugyintezo módosítás
         Route::patch('/modosit-ugyintezo/{id}', [UgyintezoController::class, 'ugyintezoPatch']);
-        //Hány szakra jelentkezett egy diák
+        
+
 
     });
+    //kik jelentkeztek arra a szakra
+    Route::get("/szakra-jelentkezett/{szak}", [SzakController::class, 'getJelentkezokSzakra']);
+    //csak nappali tagozatra jelentkeztek
+    Route::get("/nappali-jelentkezok", [JelentkezoController::class, 'nappaliJelentkezok']);
+    //csak nappali tagozatra jelentkeztek
+    Route::get("/esti-jelentkezok", [JelentkezoController::class, 'estiJelentkezok']);
+    //hány jelentkezőnek van elfogadva a státusza
+    Route::get("/statusz-elfogadva", [JelentkezesController::class, 'elfogadottakSzakonkent']);
+
+
+
     
 
+    //archiválás
+    //havonta hányan jelentkeztek, regisztráltak (szakonként is)
+    //évente hányan jelentkeztek, regisztráltak (szakonként is)
+    //ki jelentkezett de nem regisztrált
+    //25év feletti
