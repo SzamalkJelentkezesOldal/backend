@@ -35,8 +35,8 @@ Route::middleware(['auth:sanctum', Ugyintezo::class])
     });
 
 
-// Master
-Route::middleware(['auth:sanctum', Master::class])
+    // Master
+    Route::middleware(['auth:sanctum', Master::class])
     ->group(function () {
         //Ugyintezo felvétele
         Route::post('/uj-ugyintezo', [UgyintezoController::class, 'postUgyintezo']);

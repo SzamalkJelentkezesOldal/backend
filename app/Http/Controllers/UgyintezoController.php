@@ -21,8 +21,7 @@ class UgyintezoController extends Controller
         $ujUgyintezo = Ugyintezo::create([
             'nev' => $ellenorzottAdatok['nev'],
             'email' => $ellenorzottAdatok['email'],
-            'jelszo' => $ellenorzottAdatok['jelszo'], 
-            'jelszoMegerosites' => $ellenorzottAdatok['jelszo'],
+            'jelszo' =>Hash::make($ellenorzottAdatok['jelszo']), 
             'master' => $ellenorzottAdatok['master'] ?? false,
         ]);
 

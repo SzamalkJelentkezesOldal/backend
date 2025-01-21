@@ -13,7 +13,6 @@ class Ugyintezo extends Model
         'nev',
         'email',
         'jelszo',
-        'jelszoMegerosites',
         'master',
     ];
 }
