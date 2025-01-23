@@ -49,6 +49,10 @@ return new class extends Migration
         DokumentumTipus::create([
             'elnevezes' => 'Tanulmányi dokumentumok',
         ]);
+
+        DokumentumTipus::create([
+            'elnevezes' => 'Önarckép',
+        ]);
     }
 
     /**

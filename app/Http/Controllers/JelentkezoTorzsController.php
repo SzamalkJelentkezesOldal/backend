@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Jelentkezo;
 use App\Models\JelentkezoTorzs;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -12,7 +13,6 @@ class JelentkezoTorzsController extends Controller
     {
         // Validáció
         $rules = [
-            'jelentkezo_id' => 'required|integer|exists:jelentkezos,id',
             'vezeteknev' => 'required|string|max:255',
             'keresztnev' => 'required|string|max:255',
             'adoazonosito' => 'nullable|string|max:20|unique:jelentkezo_torzs,adoazonosito',
@@ -44,21 +44,19 @@ class JelentkezoTorzsController extends Controller
             ], 422);
         }
 
-        // Adatok mentése az adatbázisba
+
+
         try {
-            $data = $request->only([
-                'jelentkezo_id',
-                'vezeteknev',
-                'keresztnev',
-                'adoazonosito',
-                'lakcim',
-                'taj_szam',
-                'szuletesi_hely',
-                'szuletesi_nev',
-                'szuletesi_datum',
-                'allampolgarsag',
-                'anyja_neve',
-            ]);
+            $jelentkezo = Jelentkezo::where('email', $request->input('email'))->first();
+
+            if (!$jelentkezo) {
+                return response()->json([
+                    'error' => 'A megadott email címhez nem található jelentkező.',
+                ], 404);
+            }
+
+            $data = $request->except('email'); 
+            $data['jelentkezo_id'] = $jelentkezo->id; 
 
             $torzs = JelentkezoTorzs::create($data);
 
