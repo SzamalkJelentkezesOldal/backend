@@ -18,6 +18,8 @@ Route::post("/uj-jelentkezo", [JelentkezoController::class, 'postJelentkezoJelen
 Route::post('/torzsadat-feltolt', [JelentkezoTorzsController::class, 'torzsadatFeltoltes']);
 Route::get('/szakok-szama/{id}', [JelentkezesController::class, 'countJelentkezesSzama']);
 Route::get('/jelentkezo-adatai/{id}', [JelentkezoController::class, 'getJelentkezoAdatok']);
+Route::get('/ugyintezok', [UgyintezoController::class, 'getUgyintezok']);
+
 
 
 // Jelentkező
@@ -31,19 +33,24 @@ Route::middleware(['auth:sanctum'])
 // Ügyintéző 
 Route::middleware(['auth:sanctum', Ugyintezo::class])
     ->group(function () {
+        //jelentkezők alapadatainak kilistázása
         Route::get("/jelentkezok", [JelentkezoController::class, 'index']);
+        //jelentkezes állapotának módosítása
     });
+    Route::post('/allapot-valtozas', [JelentkezesController::class, 'allapotValtozas']);
 
 
-// Master
-Route::middleware(['auth:sanctum', Master::class])
+    
+    //Ugyintezo felvétele (majd masterbe)
+    Route::post('/uj-ugyintezo', [UgyintezoController::class, 'postUgyintezo']);
+    // Master
+    Route::middleware(['auth:sanctum', Master::class])
     ->group(function () {
-        //Ugyintezo felvétele
-        Route::post('/uj-ugyintezo', [UgyintezoController::class, 'postUgyintezo']);
         //Ugyintezo törlése
         Route::delete('/delete-ugyintezo/{id}', [UgyintezoController::class, 'ugyintezoDelete']);
         //Ugyintezo módosítás
         Route::patch('/modosit-ugyintezo/{id}', [UgyintezoController::class, 'ugyintezoPatch']);
+        //Ugyintezok lekerese
         
 
 
