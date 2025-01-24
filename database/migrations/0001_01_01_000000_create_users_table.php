@@ -50,6 +50,13 @@ return new class extends Migration
             'password' => bcrypt('asdasdasd'),
             'role' => 1,
         ]);
+
+        User::create([
+            'name' => 'Master', 
+            'email' => 'master@master.com', 
+            'password' => bcrypt('asdasdasd'),
+            'role' => 2,
+        ]);
     }
 
     /**
