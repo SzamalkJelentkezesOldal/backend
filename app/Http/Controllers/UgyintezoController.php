@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Ugyintezo;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -13,17 +14,18 @@ class UgyintezoController extends Controller
     {
         $ellenorzottAdatok = $request->validate([
             'nev' => 'required|string|max:255',
-            'email' => 'required|email|unique:ugyintezos,email',
+            'email' => 'required|email|unique:users,email',
             'jelszo' => 'required|string|min:6',
             'jelszoMegerosites' => 'required|same:jelszo',
             'master' => 'boolean',
         ]);
 
-        $ujUgyintezo = Ugyintezo::create([
-            'nev' => $ellenorzottAdatok['nev'],
+   
+        $ujUgyintezo = User::create([
+            'name' => $ellenorzottAdatok['nev'],
             'email' => $ellenorzottAdatok['email'],
-            'jelszo' => Hash::make($ellenorzottAdatok['jelszo']),
-            'master' => $ellenorzottAdatok['master'] ?? false,
+            'password' => Hash::make($ellenorzottAdatok['jelszo']),
+            'role' => $ellenorzottAdatok['master'] ? 2 : 1, 
         ]);
 
         return response()->json($ujUgyintezo);
@@ -31,8 +33,8 @@ class UgyintezoController extends Controller
 
     public function getUgyintezok()
     {
-        $ugyintezok = Ugyintezo::all();
-        return response()->json($ugyintezok);
+        $response = User::where('role', '>', 0)->get(); 
+        return response()->json($response);
     }
 
     public function ugyintezoDelete(string $id)
