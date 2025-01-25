@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('portfolios', function (Blueprint $table) {
             $table->id(); 
             $table->foreignId('jelentkezo_id')->references('id')->on('jelentkezos');
-            $table->string('portfolio_url');
             $table->foreignId('szak_id')->references('id')->on('szaks');
+            $table->string('portfolio_url');
             $table->timestamps();
         
             // Egyedi kombinációk létrehozása (indexek)

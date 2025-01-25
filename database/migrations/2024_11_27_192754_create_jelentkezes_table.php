@@ -17,8 +17,10 @@ return new class extends Migration
             $table->foreignId('jelentkezo_id')->references('id')->on('jelentkezos');
             $table->foreignId('szak_id')->references('id')->on('szaks');
             $table->foreignId('allapot')->references('id')->on('allapotszotars');
+            $table->tinyInteger("sorrend")->default(0);
             $table->timestamps();
         });
+        
         Jelentkezes::create([
             "szak_id"=>1,
             "jelentkezo_id"=>1,

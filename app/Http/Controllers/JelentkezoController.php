@@ -43,11 +43,13 @@ class JelentkezoController extends Controller
             Mail::to($request->jelentkezo['email'])->send(new JelentkezoMail($request->jelentkezo['nev'], $regisztraciosLink));
 
             //jelentkezesbe
-            foreach ($request->jelentkezes['kivalasztottSzakok'] as $szakId) {
+            foreach ($request->jelentkezes['kivalasztottSzakok'] as $index => $szakId) {
                 $jelentkezes = new Jelentkezes();
                 $jelentkezes->szak_id = $szakId;
                 $jelentkezes->jelentkezo_id = $jelentkezo->id;
-                $jelentkezes->allapot = 'eldöntésre vár'; // Kezdeti állapot
+                $jelentkezes->allapot = 1; 
+                $jelentkezes->sorrend = $index; 
+
                 $jelentkezes->save();
             }
 

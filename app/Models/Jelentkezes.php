@@ -7,13 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class Jelentkezes extends Model
 {
+
     /** @use HasFactory<\Database\Factories\JelentkezesFactory> */
     use HasFactory;
 
     protected $fillable = [
         'szak_id',
         'jelentkezo_id',
-        'allapot'
+        'allapot',
+        'sorrend'
     ];
 
     protected function setKeysForSaveQuery($query)

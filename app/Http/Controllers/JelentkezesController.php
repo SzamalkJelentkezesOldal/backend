@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Jelentkezes;
 use App\Models\Jelentkezo;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class JelentkezesController extends Controller
@@ -68,4 +70,50 @@ class JelentkezesController extends Controller
             'message' => 'Jelentkezés állapota frissítve.',
         ]);
     }
+
+    public function getJelentkezesek(String $email)
+    {
+        $jelentkezoId = DB::table('jelentkezos')->where('email', $email)->value('id');
+
+        $jelentkezesek = Jelentkezes::where('jelentkezo_id', $jelentkezoId)
+        ->join('szaks', 'jelentkezes.szak_id', '=', 'szaks.id')
+        ->select('jelentkezes.sorrend', 'szaks.elnevezes', 'jelentkezes.jelentkezo_id', 'jelentkezes.szak_id')
+        ->get();
+
+        return response()->json($jelentkezesek);
+    }
+
+    public function updateSorrend(Request $request, $jelentkezo_id)
+    {
+        $jelentkezo_id = DB::table('jelentkezos')->where('id', $jelentkezo_id)->value('id');
+
+        $validatedData = $request->validate([
+            'jelentkezesek' => 'required|array',
+            'jelentkezesek.*.szak_id' => 'required|integer|exists:szaks,id',
+            'jelentkezesek.*.sorrend' => 'required|integer',
+        ]);
+
+        try {
+            foreach ($validatedData['jelentkezesek'] as $jelentkezes) {
+                DB::table('jelentkezes')
+                    ->where('szak_id', $jelentkezes['szak_id'])
+                    ->where('jelentkezo_id', $jelentkezo_id)
+                    ->update([
+                        'sorrend' => $jelentkezes['sorrend'],
+                        'allapot' => 2,
+                        'updated_at' => now(),
+                    ]);
+            }
+            
+            Log::info(DB::getQueryLog());
+
+            return response()->json(['message' => 'Sorrend sikeresen frissítve.']);
+        } catch (\Exception $e) {
+            Log::error('Hiba történt: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Belső hiba történt: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
 }

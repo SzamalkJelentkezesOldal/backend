@@ -20,6 +20,12 @@ Route::get('/szakok-szama/{id}', [JelentkezesController::class, 'countJelentkeze
 Route::get('/jelentkezo-adatai/{id}', [JelentkezoController::class, 'getJelentkezoAdatok']);
 Route::get('/ugyintezok', [UgyintezoController::class, 'getUgyintezok']);
 
+// egy jelentkezőnek a szakokra való jelentkezését listázza
+Route::get('/jelentkezesek/{jelentkezo}', [JelentkezesController::class, 'getJelentkezesek']);
+
+// egy jelentkezőnek a szakokra való jelentkezésének sorrendjét módosítja
+Route::patch('/jelentkezesek/sorrend/{jelentkezo}', [JelentkezesController::class, 'updateSorrend']);
+
 
 
 // Jelentkező
