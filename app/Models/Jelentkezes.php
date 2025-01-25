@@ -18,14 +18,6 @@ class Jelentkezes extends Model
         'sorrend'
     ];
 
-    protected function setKeysForSaveQuery($query)
-    {
-        $query
-            ->where('szak_id', '=', $this->getAttribute('szak_id'))
-            ->where('jelentkezo_id', '=', $this->getAttribute('jelentkezo_id'));
-
-        return $query;
-    }
 
     // jelentkezes modelba
     public function jelentkezo(){

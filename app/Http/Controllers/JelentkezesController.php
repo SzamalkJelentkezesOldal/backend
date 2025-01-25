@@ -85,7 +85,7 @@ class JelentkezesController extends Controller
 
     public function updateSorrend(Request $request, $jelentkezo_id)
     {
-        $jelentkezo_id = DB::table('jelentkezos')->where('id', $jelentkezo_id)->value('id');
+        $jelentkezo = DB::table('jelentkezos')->where('id', $jelentkezo_id)->first();
 
         $validatedData = $request->validate([
             'jelentkezesek' => 'required|array',
@@ -97,11 +97,12 @@ class JelentkezesController extends Controller
             foreach ($validatedData['jelentkezesek'] as $jelentkezes) {
                 DB::table('jelentkezes')
                     ->where('szak_id', $jelentkezes['szak_id'])
-                    ->where('jelentkezo_id', $jelentkezo_id)
+                    ->where('jelentkezo_id', $jelentkezo->id)
                     ->update([
+                        // 'allapot' => 2,
                         'sorrend' => $jelentkezes['sorrend'],
-                        'allapot' => 2,
-                        'updated_at' => now(),
+                        // 'created_at' => $jelentkezo->created_at,
+                        // 'updated_at' => now(),
                     ]);
             }
             

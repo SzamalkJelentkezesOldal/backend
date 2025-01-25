@@ -23,15 +23,15 @@ return new class extends Migration
         });
 
         // Trigger létrehozása
-        DB::unprepared("
-            CREATE TRIGGER trg_jelentkezes_update
-            BEFORE UPDATE ON jelentkezes
-            FOR EACH ROW
-            BEGIN
-                INSERT INTO statuszvaltozas (jelentkezo_id, szak_id, allapot, modositas_ideje)
-                VALUES (OLD.jelentkezo_id, OLD.szak_id, OLD.allapot, NOW(), NULL);
-            END
-        ");
+        // DB::unprepared("
+        //     CREATE TRIGGER trg_jelentkezes_update
+        //     BEFORE UPDATE ON jelentkezes
+        //     FOR EACH ROW
+        //     BEGIN
+        //         INSERT INTO statuszvaltozas (jelentkezo_id, szak_id, allapot, modositas_ideje)
+        //         VALUES (OLD.jelentkezo_id, OLD.szak_id, OLD.allapot, NOW(), NULL);
+        //     END
+        // ");
     }
 
     /**

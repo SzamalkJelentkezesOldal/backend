@@ -13,12 +13,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('jelentkezes', function (Blueprint $table) {
-            $table->primary(['szak_id', 'jelentkezo_id']);
+            $table->id();
             $table->foreignId('jelentkezo_id')->references('id')->on('jelentkezos');
             $table->foreignId('szak_id')->references('id')->on('szaks');
             $table->foreignId('allapot')->references('id')->on('allapotszotars');
             $table->tinyInteger("sorrend")->default(0);
             $table->timestamps();
+
+            $table->unique(['jelentkezo_id', 'szak_id']);
         });
         
         Jelentkezes::create([
@@ -26,11 +28,6 @@ return new class extends Migration
             "jelentkezo_id"=>1,
             "allapot"=>2
         ]);
-        /* Jelentkezes::create([
-            "szak_id"=>9,
-            "jelentkezo_id"=>1,
-            "allapot"=>"Eldöntésre vár"
-        ]); */
     }
 
     /**
