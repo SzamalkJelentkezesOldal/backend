@@ -2,7 +2,6 @@
 
 namespace App\Observers;
 
-use App\Enums\Allapot;
 use App\Helpers\AllapotHelper;
 use App\Models\Jelentkezes;
 use App\Models\JelentkezoTorzs;
@@ -20,13 +19,16 @@ class JelentkezoTorzsObserver
             $jelentkezesek = Jelentkezes::where('jelentkezo_id', $torzs->jelentkezo_id)->get();
     
             foreach ($jelentkezesek as $jelentkezes) {
-                $ujAllapotId = AllapotHelper::getId(Allapot::TORZSADATOK_FELTOLTVE);
+                $regiAllapot = $jelentkezes->allapot;
+
+                $ujAllapotId = AllapotHelper::getId("Törzsadatok feltöltve");
                 $jelentkezes->update(['allapot' => $ujAllapotId]);
     
                 Statuszvaltozas::create([
                     'jelentkezo_id' => $torzs->jelentkezo_id,
                     'szak_id' => $jelentkezes->szak_id,
-                    'allapot' => Allapot::TORZSADATOK_FELTOLTVE->value,
+                    'regi_allapot' => $regiAllapot,
+                    'uj_allapot' => $ujAllapotId,
                     'user_id' => null,
                 ]);
             }

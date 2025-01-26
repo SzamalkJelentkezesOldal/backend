@@ -10,11 +10,21 @@ class Statuszvaltozas extends Model
     protected $fillable = [
         'jelentkezo_id',
         'szak_id',
-        'allapot',
+        'regi_allapot',
+        'uj_allapot',
         'modositas_ideje',
         'user_id'
     ];
 
+    public function regiAllapot()
+    {
+        return $this->belongsTo(Allapotszotar::class, 'regi_allapot');
+    }
+
+    public function ujAllapot()
+    {
+        return $this->belongsTo(Allapotszotar::class, 'uj_allapot');
+    }
 
     public function jelentkezo()
     {

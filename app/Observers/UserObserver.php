@@ -2,7 +2,6 @@
 
 namespace App\Observers;
 
-use App\Enums\Allapot;
 use App\Helpers\AllapotHelper;
 use App\Models\Jelentkezo;
 use App\Models\Statuszvaltozas;
@@ -17,19 +16,21 @@ class UserObserver
      */
     public function created(User $user): void
     {
-        Log::info('az observer fut!');
         DB::transaction(function () use ($user) {
             $jelentkezo = Jelentkezo::where('email', $user->email)->first();
     
             if ($jelentkezo) {
                 foreach ($jelentkezo->jelentkezesek as $jelentkezes) {
-                    $ujAllapotId = AllapotHelper::getId(Allapot::REGISZTRALT);
+                    $regiAllapot = $jelentkezes->allapot;
+
+                    $ujAllapotId = AllapotHelper::getId("Regisztrált");
                     $jelentkezes->update(['allapot' => $ujAllapotId]);
     
                     Statuszvaltozas::create([
                         'jelentkezo_id' => $jelentkezo->id,
                         'szak_id' => $jelentkezes->szak_id,
-                        'allapot' => Allapot::REGISZTRALT->value,
+                        'regi_allapot' => $regiAllapot,
+                        'uj_allapot' => $ujAllapotId,
                         'user_id' => null,
                     ]);
                 }

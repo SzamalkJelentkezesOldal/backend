@@ -2,11 +2,8 @@
 
 namespace App\Observers;
 
-use App\Enums\Allapot;
 use App\Helpers\AllapotHelper;
 use App\Models\Dokumentumok;
-use App\Models\Jelentkezes;
-use App\Models\Jelentkezo;
 use App\Models\Statuszvaltozas;
 use Illuminate\Support\Facades\DB;
 
@@ -22,13 +19,16 @@ class DokumentumokObserver
     
             if ($jelentkezo) {
                 foreach ($jelentkezo->jelentkezesek as $jelentkezes) {
-                    $ujAllapotId = AllapotHelper::getId(Allapot::DOKUMENTUMOK_FELTOLTVE);
+                    $regiAllapot = $jelentkezes->allapot;
+
+                    $ujAllapotId = AllapotHelper::getId("Dokumentumok feltöltve");
                     $jelentkezes->update(['allapot' => $ujAllapotId]);
     
                     Statuszvaltozas::create([
                         'jelentkezo_id' => $jelentkezo->id,
                         'szak_id' => $jelentkezes->szak_id,
-                        'allapot' => Allapot::DOKUMENTUMOK_FELTOLTVE->value,
+                        'regi_allapot' => $regiAllapot,
+                        'uj_allapot' => $ujAllapotId,
                         'user_id' => null,
                     ]);
                 }

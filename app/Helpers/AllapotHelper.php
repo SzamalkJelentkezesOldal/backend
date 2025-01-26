@@ -7,13 +7,8 @@ use App\Models\Allapotszotar;
 
 class AllapotHelper
 {
-    public static function getId(Allapot $allapot): int
+    public static function getId(string $allapotNev): int
     {
-        // Cache-eljük az állapotokat, hogy ne kelljen minden alkalommal lekérdezni az adatbázist
-        $allapotok = cache()->rememberForever('allapotszotar', function () {
-            return Allapotszotar::pluck('id', 'elnevezes')->toArray();
-        });
-
-        return $allapotok[$allapot->value];
+        return Allapotszotar::where('elnevezes', $allapotNev)->first()->id;
     }
 }

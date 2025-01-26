@@ -16,22 +16,12 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('jelentkezo_id');
             $table->unsignedBigInteger('szak_id');
-            $table->string('allapot', 50);
+            $table->foreignId('regi_allapot')->references('id')->on('allapotszotars');
+            $table->foreignId('uj_allapot')->references('id')->on('allapotszotars');
             $table->timestamp('modositas_ideje')->useCurrent();
-            $table->unsignedBigInteger('user_id')->nullable(); // Opcionális
+            $table->unsignedBigInteger('user_id')->nullable();
             $table->timestamps();
         });
-
-        // Trigger létrehozása
-        // DB::unprepared("
-        //     CREATE TRIGGER trg_jelentkezes_update
-        //     BEFORE UPDATE ON jelentkezes
-        //     FOR EACH ROW
-        //     BEGIN
-        //         INSERT INTO statuszvaltozas (jelentkezo_id, szak_id, allapot, modositas_ideje)
-        //         VALUES (OLD.jelentkezo_id, OLD.szak_id, OLD.allapot, NOW(), NULL);
-        //     END
-        // ");
     }
 
     /**
