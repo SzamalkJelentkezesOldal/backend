@@ -17,6 +17,12 @@ class Jelentkezo extends Model
         'token'
     ];
 
+    // 3. Jelentkezőhöz tartozó dokumentumok (1->N)
+    public function dokumentumok()
+    {
+        return $this->hasMany(Dokumentumok::class, 'jelentkezo_id');
+    }
+
     // jelentkezo modelba 
     public function jelentkezesek()
     {

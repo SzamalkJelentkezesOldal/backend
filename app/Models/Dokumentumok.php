@@ -15,4 +15,15 @@ class Dokumentumok extends Model
         'dokumentum_id',
         'dokumentum_url'
     ];
+
+    public function jelentkezo()
+    {
+        return $this->belongsTo(Jelentkezo::class, 'jelentkezo_id');
+    }
+
+    
+    public function tipus()
+    {
+        return $this->belongsTo(DokumentumTipus::class, 'dokumentum_id');
+    }
 }

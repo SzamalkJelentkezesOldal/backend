@@ -3,6 +3,7 @@
 use App\Models\Allapotszotar;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -18,7 +19,7 @@ return new class extends Migration
             $table->timestamps();
         });
         Allapotszotar::create([
-            "elnevezes" => "Jelenetkezett"
+            "elnevezes" => "Jelentkezett"
         ]);
         Allapotszotar::create([
             "elnevezes" => "Regisztrált"
@@ -38,6 +39,8 @@ return new class extends Migration
         Allapotszotar::create([
             "elnevezes" => "Elutasítva"
         ]);
+
+        Artisan::call('cache:forget allapotszotar');
     }
 
     /**

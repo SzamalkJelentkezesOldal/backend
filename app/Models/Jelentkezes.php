@@ -19,8 +19,17 @@ class Jelentkezes extends Model
     ];
 
 
-    // jelentkezes modelba
     public function jelentkezo(){
         return $this->belongsTo(Jelentkezo::class,'jelentkezo_id','id');
+    }
+
+    public function szak()
+    {
+        return $this->belongsTo(Szak::class, 'szak_id');
+    }
+
+    public function statuszvaltozasok()
+    {
+        return $this->hasMany(Statuszvaltozas::class, 'jelentkezo_id', 'jelentkezo_id');
     }
 }

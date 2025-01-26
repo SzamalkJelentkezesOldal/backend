@@ -24,6 +24,11 @@ class User extends Authenticatable
         'role'
     ];
 
+    public function jelentkezo()
+    {
+        return $this->belongsTo(Jelentkezo::class, 'email', 'email');
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *
