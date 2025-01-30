@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DokumentumokController;
 use App\Http\Controllers\DokumentumTipusController;
 use App\Http\Controllers\JelentkezesController;
 use App\Http\Controllers\JelentkezoController;
@@ -19,6 +20,14 @@ Route::post('/torzsadat-feltolt', [JelentkezoTorzsController::class, 'torzsadatF
 Route::get('/szakok-szama/{id}', [JelentkezesController::class, 'countJelentkezesSzama']);
 Route::get('/jelentkezo-adatai/{id}', [JelentkezoController::class, 'getJelentkezoAdatok']);
 Route::get('/ugyintezok', [UgyintezoController::class, 'getUgyintezok']);
+
+//ezt majd a bejelentlezett user
+Route::get('/nyilatkozat-letoltes/{year}', [DokumentumokController::class, 'nyilatkozatLetolt']);
+
+//ezt majd az uygintezo
+Route::post('/nyilatkozat-feltoltes', [DokumentumokController::class, 'nyilatkozatFeltolt']);
+
+
 
 // egy jelentkezőnek a szakokra való jelentkezését listázza
 Route::get('/jelentkezesek/{jelentkezo}', [JelentkezesController::class, 'getJelentkezesek']);

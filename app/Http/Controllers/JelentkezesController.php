@@ -99,14 +99,10 @@ class JelentkezesController extends Controller
                     ->where('szak_id', $jelentkezes['szak_id'])
                     ->where('jelentkezo_id', $jelentkezo->id)
                     ->update([
-                        // 'allapot' => 2,
                         'sorrend' => $jelentkezes['sorrend'],
-                        // 'created_at' => $jelentkezo->created_at,
-                        // 'updated_at' => now(),
                     ]);
             }
             
-            Log::info(DB::getQueryLog());
 
             return response()->json(['message' => 'Sorrend sikeresen frissítve.']);
         } catch (\Exception $e) {
