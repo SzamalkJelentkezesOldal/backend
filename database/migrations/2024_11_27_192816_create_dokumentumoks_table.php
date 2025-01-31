@@ -12,10 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('dokumentumoks', function (Blueprint $table) {
+            $table->id();
             $table->foreignId('jelentkezo_id')->references('id')->on('jelentkezos');
-            $table->primary('jelentkezo_id');
-            $table->foreignId('dokumentum_id')->references('id')->on('dokumentum_tipuses');
-            $table->string('dokumentum_url')->unique();
+            $table->foreignId('dokumentum_tipus_id')->references('id')->on('dokumentum_tipuses');
+            $table->json('fajlok');
             $table->timestamps();
         });
     }

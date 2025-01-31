@@ -27,11 +27,11 @@ return new class extends Migration
         ]);
         
         DokumentumTipus::create([
-            'elnevezes' => 'Személyazonosító igazolvány első oldal',
+            'elnevezes' => 'Személyazonosító igazolvány első oldala',
         ]);
         
         DokumentumTipus::create([
-            'elnevezes' => 'Személyazonosító igazolvány hátsó oldal',
+            'elnevezes' => 'Személyazonosító igazolvány hátsó oldala',
         ]);
         
         DokumentumTipus::create([
@@ -52,6 +52,14 @@ return new class extends Migration
 
         DokumentumTipus::create([
             'elnevezes' => 'Önarckép',
+        ]);
+
+        DokumentumTipus::create([
+            'elnevezes' => 'SNI/BTMN',
+        ]);
+
+        DokumentumTipus::create([
+            'elnevezes' => 'Nyilatkozatok',
         ]);
     }
 

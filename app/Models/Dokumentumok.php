@@ -12,8 +12,8 @@ class Dokumentumok extends Model
     use HasFactory;
     protected $fillable = [
         'jelentkezo_id',
-        'dokumentum_id',
-        'dokumentum_url'
+        'dokumentum_tipus_id',
+        'fajlok'
     ];
 
     public function jelentkezo()

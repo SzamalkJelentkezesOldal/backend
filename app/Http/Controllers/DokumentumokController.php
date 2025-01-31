@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\DokumentumokFeltoltRequest;
+use App\Models\Dokumentumok;
+use App\Models\DokumentumTipus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -75,5 +78,63 @@ class DokumentumokController extends Controller
             Log::error('Letöltési hiba: '.$e->getMessage());
             return response()->json(['error' => 'Szerverhiba: '.$e->getMessage()], 500);
         }
+    }
+
+    public function dokumentumokFeltolt(DokumentumokFeltoltRequest $request)
+    {
+
+        Log::info($request);
+        $validated = $request->validated();
+        $jelentkezoId = Auth::user()->jelentkezo->id;
+    
+        try {
+            foreach ($validated as $field => $files) {
+                $tipusNev = $this->getTipusNev($field);
+                $tipus = DokumentumTipus::firstOrCreate(['elnevezes' => $tipusNev]);
+                
+                $paths = [];
+                foreach ($files as $file) {
+                    $paths[] = $file->store(
+                        "dokumentumok/{$jelentkezoId}/{$tipus->id}", 
+                        'private'
+                    );
+                }
+    
+                Dokumentumok::updateOrCreate(
+                    [
+                        'jelentkezo_id' => $jelentkezoId,
+                        'dokumentum_tipus_id' => $tipus->id
+                    ],
+                    ['fajlok' => json_encode($paths)]
+                );
+            }
+    
+            return response()->json(['message' => 'Dokumentumok sikeresen mentve']);
+    
+        } catch (\Exception $e) {
+            Log::error('Dokumentum feltöltési hiba: '.$e->getMessage());
+            return response()->json([
+                'error' => 'Szerverhiba: '.$e->getMessage()
+            ], 500);
+        }
+    }
+
+    private function getTipusNev($mezoNev)
+    {
+        $types = [
+            'adoazonosito' => 'Adóigazolvány',
+            'taj' => 'TAJ kártya',
+            'szemelyi_elso' => 'Személyazonosító igazolvány első oldala',
+            'szemelyi_hatso' => 'Személyazonosító igazolvány hátsó oldala',
+            'lakcim_elso' => 'Lakcímet igazoló igazolvány első oldala',
+            'lakcim_hatso' => 'Lakcímet igazoló igazolvány hátsó oldala',
+            'onarckep' => 'Önarckép',
+            'nyilatkozatok' => 'Nyilatkozazok',
+            'erettsegik' => 'Érettségi bizonyítvány',
+            'tanulmanyik' => 'Tanulmányi dokumentumok',
+            'specialisok' => 'SNI/BTMN'
+        ];
+    
+        return $types[$mezoNev] ?? 'Ismeretlen dokumentum típus';
     }
 }

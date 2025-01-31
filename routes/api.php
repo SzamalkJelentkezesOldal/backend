@@ -16,11 +16,10 @@ use Illuminate\Support\Facades\Route;
 Route::get('/szakok', [SzakController::class, 'getSzakok']);
 Route::get('/dokumentum-tipusok', [DokumentumTipusController::class, 'getDokumentumTipusok']);
 Route::post("/uj-jelentkezo", [JelentkezoController::class, 'postJelentkezoJelentkezesPortfolio']);
-Route::post('/torzsadat-feltolt', [JelentkezoTorzsController::class, 'torzsadatFeltoltes']);
 Route::get('/szakok-szama/{id}', [JelentkezesController::class, 'countJelentkezesSzama']);
 Route::get('/jelentkezo-adatai/{id}', [JelentkezoController::class, 'getJelentkezoAdatok']);
-Route::get('/ugyintezok', [UgyintezoController::class, 'getUgyintezok']);
 
+Route::post('/dokumentumok-feltolt', [DokumentumokController::class, 'dokumentumokFeltolt']);
 
 // Jelentkező
 Route::middleware(['auth:sanctum'])
@@ -28,10 +27,17 @@ Route::middleware(['auth:sanctum'])
         Route::get('/user', function (Request $request) {
             return $request->user();
         });
-        //Jelentkezési nyilatkozat letöltése év szerint
+        // jelentkező törzsadatának feltöltése
+        Route::post('/torzsadat-feltolt', [JelentkezoTorzsController::class, 'torzsadatFeltoltes']);
+        
+        // jelentkező dokumentjainak feltöltése
+
+        // jelentkezési nyilatkozat letöltése év szerint
         Route::get('/nyilatkozat-letoltes/{year}', [DokumentumokController::class, 'nyilatkozatLetolt']);
+
         // egy jelentkezőnek a szakokra való jelentkezését listázza
         Route::get('/jelentkezesek/{jelentkezo}', [JelentkezesController::class, 'getJelentkezesek']);
+
         // egy jelentkezőnek a szakokra való jelentkezésének sorrendjét módosítja
         Route::patch('/jelentkezesek/sorrend/{jelentkezo}', [JelentkezesController::class, 'updateSorrend']);
     });
@@ -41,22 +47,30 @@ Route::middleware(['auth:sanctum', Ugyintezo::class])
     ->group(function () {
         //jelentkezők alapadatainak kilistázása
         Route::get("/jelentkezok", [JelentkezoController::class, 'index']);
+
         //jelentkezes állapotának módosítása
 
         //kik jelentkeztek arra a szakra
         Route::get("/szakra-jelentkezett/{szak}", [SzakController::class, 'getJelentkezokSzakra']);
+
         //hanyan jelentkeztek arra a szakra
         Route::get("/jelentkezok-szama/{szak}", [SzakController::class, 'jelentkezokSzamaSzakra']);
+
         //csak nappali tagozatra jelentkeztek
         Route::get("/nappali-jelentkezok", [JelentkezoController::class, 'nappaliJelentkezok']);
+
         //csak esti tagozatra jelentkeztek
         Route::get("/esti-jelentkezok", [JelentkezoController::class, 'estiJelentkezok']);
+
         //csak bizonyos tagozatra jelentkeztek
         Route::get("/tagozat-jelentkezok/{szam}", [JelentkezoController::class, 'csakEgyTagozatraJelentkezett']);
+
         //hány jelentkezőnek van elfogadva a státusza
         Route::get("/statusz-elfogadva", [JelentkezesController::class, 'elfogadottakSzakonkent']);
+
         //Nyilatkozat feltöltése
         Route::post('/nyilatkozat-feltoltes', [DokumentumokController::class, 'nyilatkozatFeltolt']);
+
         //Állapot változás
         Route::patch('/allapot-valtozas', [JelentkezesController::class, 'allapotValtozas']);
         
@@ -69,10 +83,13 @@ Route::middleware(['auth:sanctum', Master::class])
     ->group(function () {
         //Ugyintezo felvétele (master)
         Route::post('/uj-ugyintezo', [UgyintezoController::class, 'postUgyintezo']);
+
         //Ugyintezo törlése
         Route::delete('/delete-ugyintezo/{id}', [UgyintezoController::class, 'ugyintezoDelete']);
+
         //Ugyintezo módosítás
         Route::patch('/modosit-ugyintezo/{id}', [UgyintezoController::class, 'ugyintezoPatch']);
+
         //Ugyintezok lekerese
         Route::get('/ugyintezok', [UgyintezoController::class, 'getUgyintezok']);
     });
