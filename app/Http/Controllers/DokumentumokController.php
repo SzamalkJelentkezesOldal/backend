@@ -14,7 +14,7 @@ class DokumentumokController extends Controller
     public function nyilatkozatFeltolt(Request $request)
     {
         $request->validate([
-            'ev' => 'required|integer|min:2023|max:2025',
+            'ev' => 'required|integer|min:'.(date('Y')).'|max:'.(date('Y')+1),
             'nyilatkozat' => 'required|file|mimes:docx|max:5120'
         ]);
 
@@ -33,45 +33,47 @@ class DokumentumokController extends Controller
     }
 
     public function nyilatkozatLetolt($year)
-{
-    try {
-        if (!Auth::check()) {
-            return response()->json(['error' => 'Hozzáférés megtagadva'], 403);
+    {
+        try {
+            if (!Auth::check()) {
+                return response()->json(['error' => 'Hozzáférés megtagadva'], 403);
+            }
+
+            if (!is_numeric($year) || $year < date('Y') || $year > date('Y')+1) {
+                return response()->json(['error' => 'Érvénytelen év'], 422);
+            }
+
+            $directory = "nyilatkozatok/{$year}";
+            $files = Storage::disk('private')->files($directory);
+
+            Log::info($files);
+
+            if (empty($files)) {
+                return response()->json(['error' => 'Nincs dokumentum'], 404);
+            }
+
+            $latestFile = collect($files)
+                ->sortByDesc(function ($file) {
+                    $version = (int) Str::beforeLast(Str::afterLast($file, '_v'), '.docx');
+                    return $version;
+                })
+                ->first();
+
+                Log::info($latestFile);
+            $fullPath = Storage::disk('private')->path($latestFile);
+
+            return response()->download(
+                $fullPath,
+                "nyilatkozat_{$year}.docx",
+                [
+                    'Content-Type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                    'Content-Disposition' => 'attachment'
+                ]
+            );
+
+        } catch (\Exception $e) {
+            Log::error('Letöltési hiba: '.$e->getMessage());
+            return response()->json(['error' => 'Szerverhiba: '.$e->getMessage()], 500);
         }
-
-        if (!is_numeric($year) || $year < 2023 || $year > date('Y')+1) {
-            return response()->json(['error' => 'Érvénytelen év'], 422);
-        }
-
-        $directory = "nyilatkozatok/{$year}";
-        $files = Storage::disk('private')->files($directory);
-
-        if (empty($files)) {
-            return response()->json(['error' => 'Nincs dokumentum'], 404);
-        }
-
-        $latestFile = collect($files)
-            ->sortByDesc(function ($file) {
-                $version = (int) Str::beforeLast(Str::afterLast($file, '_v'), '.docx');
-                return $version;
-            })
-            ->first();
-
-            Log::info($latestFile);
-        $fullPath = Storage::disk('private')->path($latestFile);
-
-        return response()->download(
-            $fullPath,
-            "nyilatkozat_{$year}.docx",
-            [
-                'Content-Type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                'Content-Disposition' => 'attachment'
-            ]
-        );
-
-    } catch (\Exception $e) {
-        Log::error('Letöltési hiba: '.$e->getMessage());
-        return response()->json(['error' => 'Szerverhiba: '.$e->getMessage()], 500);
     }
-}
 }
