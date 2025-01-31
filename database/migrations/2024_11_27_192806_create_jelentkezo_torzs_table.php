@@ -37,7 +37,7 @@ return new class extends Migration
             'taj_szam' => '987654321',
             'szuletesi_hely' => 'Debrecen',
             'szuletesi_nev' => 'Kovács János',
-            'szuletesi_datum' => '2006-07-15',
+            'szuletesi_datum' => '1999-07-15',
             'allampolgarsag' => 'magyar',
             'anyja_neve' => 'Nagy Ilona',
         ]);

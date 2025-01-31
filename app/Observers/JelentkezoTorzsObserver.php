@@ -6,6 +6,7 @@ use App\Helpers\AllapotHelper;
 use App\Models\Jelentkezes;
 use App\Models\JelentkezoTorzs;
 use App\Models\Statuszvaltozas;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class JelentkezoTorzsObserver
@@ -33,6 +34,20 @@ class JelentkezoTorzsObserver
                 ]);
             }
         });
+    }
+    public function saved(JelentkezoTorzs $jelentkezo)
+    {
+        $szeptemberElso = Carbon::now()->year . '-09-01';
+        $elutasitvaStatuszId = DB::table('allapotszotars')->where('elnevezes', 'Elutasítva')->value('id');
+
+        $szuletesiDatum = Carbon::parse($jelentkezo->szuletesi_datum);
+        if ($szuletesiDatum->addYears(25)->lt(Carbon::parse($szeptemberElso))) {
+            DB::table('jelentkezes as j')
+                ->join('szaks as sz', 'sz.id', '=', 'j.szak_id')
+                ->where('jelentkezo_id', $jelentkezo->jelentkezo_id)
+                ->where('sz.nappali', true)
+                ->update(['j.allapot' => $elutasitvaStatuszId]);
+        }
     }
 
     /**

@@ -28,6 +28,11 @@ return new class extends Migration
             "jelentkezo_id"=>1,
             "allapot"=>2
         ]);
+        Jelentkezes::create([
+            "szak_id"=>9,
+            "jelentkezo_id"=>1,
+            "allapot"=>2
+        ]);
     }
 
     /**
