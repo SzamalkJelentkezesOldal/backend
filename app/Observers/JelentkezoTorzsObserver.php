@@ -38,7 +38,7 @@ class JelentkezoTorzsObserver
     public function saved(JelentkezoTorzs $jelentkezo)
     {
         $szeptemberElso = Carbon::now()->year . '-09-01';
-        $elutasitvaStatuszId = DB::table('allapotszotars')->where('elnevezes', 'Elutasítva')->value('id');
+        $elutasitvaStatuszId = AllapotHelper::getId("Elutasítva");
 
         $szuletesiDatum = Carbon::parse($jelentkezo->szuletesi_datum);
         if ($szuletesiDatum->addYears(25)->lt(Carbon::parse($szeptemberElso))) {

@@ -77,7 +77,7 @@ class JelentkezesController extends Controller
 
         $jelentkezesek = Jelentkezes::where('jelentkezo_id', $jelentkezoId)
         ->join('szaks', 'jelentkezes.szak_id', '=', 'szaks.id')
-        ->select('jelentkezes.sorrend', 'szaks.elnevezes', 'jelentkezes.jelentkezo_id', 'jelentkezes.szak_id')
+        ->select('jelentkezes.sorrend', 'szaks.portfolio', 'szaks.elnevezes', 'jelentkezes.jelentkezo_id', 'jelentkezes.szak_id')
         ->get();
 
         return response()->json($jelentkezesek);

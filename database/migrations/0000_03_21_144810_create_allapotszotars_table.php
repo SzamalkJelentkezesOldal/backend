@@ -31,6 +31,9 @@ return new class extends Migration
             "elnevezes" => "Dokumentumok feltöltve"
         ]);
         Allapotszotar::create([
+            "elnevezes" => "Eldöntésre vár"
+        ]);
+        Allapotszotar::create([
             "elnevezes" => "Módósításra vár"
         ]);
         Allapotszotar::create([
