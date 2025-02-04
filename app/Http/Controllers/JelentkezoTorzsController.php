@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Jelentkezo;
 use App\Models\JelentkezoTorzs;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class JelentkezoTorzsController extends Controller
@@ -71,4 +72,33 @@ class JelentkezoTorzsController extends Controller
             ], 500);
         }
     }
+
+    public function getJelentkezoAdatok($email) {
+        $jelentkezo = DB::table('jelentkezos')->where('email', $email)->first();
+
+        $adatok = JelentkezoTorzs::where('jelentkezo_id', $jelentkezo->id)->first();
+
+        return response()->json($adatok);
+    }
+
+    public function updateJelentkezoTorzs(Request $request, $jelentkezo_id) {
+        $rules = [
+            'vezeteknev' => 'required|string|max:255',
+            'keresztnev' => 'required|string|max:255',
+            'adoazonosito' => 'nullable|string|max:20|unique:jelentkezo_torzs,adoazonosito',
+            'taj_szam' => 'nullable|string|max:20|unique:jelentkezo_torzs,taj_szam',
+            'lakcim' => 'required|string|max:255',
+            'szuletesi_hely' => 'required|string|max:255',
+            'szuletesi_nev' => 'nullable|string|max:255',
+            'szuletesi_datum' => 'required|date',
+            'allampolgarsag' => 'required|string|max:255',
+            'anyja_neve' => 'nullable|string|max:255',
+        ];
+
+        $torzsAdat = JelentkezoTorzs::where('jelentkezo_id', $jelentkezo_id)->firstOrFail();
+        $validated = $request->validate($rules);
+        $torzsAdat->update($validated);
+        
+        return $torzsAdat;
+      }
 }

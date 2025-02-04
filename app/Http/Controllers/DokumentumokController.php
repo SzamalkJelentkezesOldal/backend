@@ -82,7 +82,6 @@ class DokumentumokController extends Controller
 
     public function dokumentumokFeltolt(DokumentumokFeltoltRequest $request)
     {
-
         Log::info($request);
         $validated = $request->validated();
         $jelentkezoId = Auth::user()->jelentkezo->id;
@@ -118,6 +117,24 @@ class DokumentumokController extends Controller
             ], 500);
         }
     }
+
+    public function getDokumentumok()
+    {
+        $user = Auth::user();
+        if (!$user || !$user->jelentkezo) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $dokumentumok = Dokumentumok::with('dokumentumTipus')
+            ->where('jelentkezo_id', $user->jelentkezo->id)
+            ->get()
+            ->mapWithKeys(function ($item) {
+                return [$this->getTipusNev($item->dokumentumTipus->elnevezes) => json_decode($item->fajlok)];
+            });
+
+        return response()->json($dokumentumok);
+    }
+
 
     private function getTipusNev($mezoNev)
     {

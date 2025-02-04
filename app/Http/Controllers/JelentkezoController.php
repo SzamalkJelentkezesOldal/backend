@@ -80,29 +80,6 @@ class JelentkezoController extends Controller
         return Jelentkezo::all();
     }
 
-    public function getJelentkezoAdatok($id)
-    {
-        $result = Jelentkezo::with(['torzsadatok' => function ($query) {
-            $query->select([
-                'jelentkezo_id',
-                'vezeteknev',
-                'keresztnev',
-                'adoazonosito',
-                'lakcim',
-                'taj_szam',
-                'szuletesi_hely',
-                'szuletesi_nev',
-                'szuletesi_datum',
-                'allampolgarsag',
-                'anyja_neve',
-            ]);
-        }])
-            ->select(['id', 'nev', 'email', 'tel', 'token'])
-            ->find($id);
-
-        return response()->json($result);
-    }
-
     public function nappaliJelentkezok()
     {
         // Lekérdezés a nappali szakokra jelentkezettekről

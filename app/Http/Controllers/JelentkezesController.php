@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\AllapotHelper;
 use App\Models\Jelentkezes;
 use App\Models\Jelentkezo;
+use App\Models\Statuszvaltozas;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
@@ -83,34 +85,85 @@ class JelentkezesController extends Controller
         return response()->json($jelentkezesek);
     }
 
-    public function updateSorrend(Request $request, $jelentkezo_id)
+    public function updateSorrend(Request $request, $jelentkezo, $beiratkozik)
     {
-        $jelentkezo = DB::table('jelentkezos')->where('id', $jelentkezo_id)->first();
-
-        $validatedData = $request->validate([
-            'jelentkezesek' => 'required|array',
-            'jelentkezesek.*.szak_id' => 'required|integer|exists:szaks,id',
-            'jelentkezesek.*.sorrend' => 'required|integer',
-        ]);
-
         try {
-            foreach ($validatedData['jelentkezesek'] as $jelentkezes) {
-                DB::table('jelentkezes')
-                    ->where('szak_id', $jelentkezes['szak_id'])
-                    ->where('jelentkezo_id', $jelentkezo->id)
-                    ->update([
-                        'sorrend' => $jelentkezes['sorrend'],
-                    ]);
-            }
+            Log::info('Params:', ['jelentkezo' => $jelentkezo, 'beiratkozik' => $beiratkozik]);
             
+            $jelentkezoRecord = DB::table('jelentkezos')->find($jelentkezo);
+            
+            if (!$jelentkezoRecord) {
+                Log::error("Nem létező jelentkező: $jelentkezo");
+                return response()->json(['error' => 'Nem létező jelentkező'], 404);
+            }
 
-            return response()->json(['message' => 'Sorrend sikeresen frissítve.']);
+            $validatedData = $request->validate([
+                'jelentkezesek' => 'required|array',
+                'jelentkezesek.*.szak_id' => 'required|integer|exists:szaks,id',
+                'jelentkezesek.*.sorrend' => 'required|integer',
+            ]);
+
+            Log::info('Validált adatok:', $validatedData);
+
+            foreach ($validatedData['jelentkezesek'] as $jelentkezes) {
+                // 1. Ellenőrizzük a jelentkezési rekord létezését
+                $existing = DB::table('jelentkezes')
+                    ->where('szak_id', $jelentkezes['szak_id'])
+                    ->where('jelentkezo_id', $jelentkezo)
+                    ->first();
+
+                if (!$existing) {
+                    Log::error("Nem létező jelentkezési rekord: ", $jelentkezes);
+                    continue;
+                }
+
+                // 2. Frissítés
+                $updateData = ['sorrend' => $jelentkezes['sorrend']];
+                
+                if ($beiratkozik) {
+                    $ujAllapot = AllapotHelper::getId("Eldöntésre vár");
+                    
+                    // 3. Ellenőrizzük az állapotot
+                    if (!$ujAllapot) {
+                        Log::error("Ismeretlen állapot: Eldöntésre vár");
+                        throw new \Exception("Hibás állapot azonosító");
+                    }
+                    
+                    $updateData['allapot'] = $ujAllapot;
+
+                    // 4. Státuszváltozás rögzítése
+                    Statuszvaltozas::create([
+                        'jelentkezo_id' => $jelentkezo,
+                        'szak_id' => $jelentkezes['szak_id'],
+                        'regi_allapot' => $existing->allapot,
+                        'uj_allapot' => $ujAllapot,
+                        'user_id' => null,
+                    ]);
+                }
+
+                DB::table('jelentkezes')
+                    ->where('id', $existing->id)
+                    ->update($updateData);
+            }
+
+            return response()->json(['message' => 'Sorrend sikeresen frissítve']);
+            
         } catch (\Exception $e) {
-            Log::error('Hiba történt: ' . $e->getMessage());
+            Log::error('HIBA: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
             return response()->json([
-                'error' => 'Belső hiba történt: ' . $e->getMessage(),
+                'error' => 'Váratlan hiba: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    public function getJelentkezesAllapot($email) {
+        $jelentkezo = DB::table('jelentkezos')->where('email', $email)->first();
+
+        $allapot = Jelentkezes::where('jelentkezo_id', $jelentkezo->id)
+                    ->join('allapotszotars', 'jelentkezes.allapot', '=', 'allapotszotars.id')
+                    ->select('allapotszotars.elnevezes', 'jelentkezes.jelentkezo_id')->first();
+
+        return response()->json($allapot);
     }
 
 }
