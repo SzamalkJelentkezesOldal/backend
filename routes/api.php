@@ -22,36 +22,36 @@ Route::get('/jelentkezo-adatai/{email}', [JelentkezoTorzsController::class, 'get
 
 // Jelentkező
 Route::middleware(['auth:sanctum'])
-->group(function () {
-    Route::get('/user', function (Request $request) {
-        return $request->user();
+    ->group(function () {
+        Route::get('/user', function (Request $request) {
+            return $request->user();
+        });
+        // jelentkező törzsadatának feltöltése
+        Route::post('/torzsadat-feltolt', [JelentkezoTorzsController::class, 'torzsadatFeltoltes']);
+
+        // jelentkező dokumentjainak feltöltése
+        Route::post('/dokumentumok-feltolt', [DokumentumokController::class, 'dokumentumokFeltolt']);
+
+        // jelentkezési nyilatkozat letöltése év szerint
+        Route::get('/nyilatkozat-letoltes/{year}', [DokumentumokController::class, 'nyilatkozatLetolt']);
+
+        // egy jelentkezőnek a szakokra való jelentkezését listázza
+        Route::get('/jelentkezesek/{jelentkezo}', [JelentkezesController::class, 'getJelentkezesek']);
+
+        // egy jelentkezőnek a szakokra való jelentkezésének sorrendjét módosítja/beiratkozik
+        Route::patch('/jelentkezesek/sorrend/{jelentkezo}/{beiratkozik}', [JelentkezesController::class, 'updateSorrend']);
+
+        // egy jelentkezőnek a jelenlegi státuszát kéri le
+        Route::get('/jelentkezes-allapot/{email}', [JelentkezesController::class, 'getJelentkezesAllapot']);
+
+        // egy jelentkező a törzsadatát módosítja
+        Route::put('/torzsadat-frissit/{jelentkezo_id}', [JelentkezoTorzsController::class, 'updateJelentkezoTorzs']);
+
+        // egy jelentkezőnek a kitöltött dokumentait kapja meg
+        Route::get('/dokumentumok', [DokumentumokController::class, 'getDokumentumok']);
     });
-    // jelentkező törzsadatának feltöltése
-    Route::post('/torzsadat-feltolt', [JelentkezoTorzsController::class, 'torzsadatFeltoltes']);
-    
-    // jelentkező dokumentjainak feltöltése
-    Route::post('/dokumentumok-feltolt', [DokumentumokController::class, 'dokumentumokFeltolt']);
-    
-    // jelentkezési nyilatkozat letöltése év szerint
-    Route::get('/nyilatkozat-letoltes/{year}', [DokumentumokController::class, 'nyilatkozatLetolt']);
-    
-    // egy jelentkezőnek a szakokra való jelentkezését listázza
-    Route::get('/jelentkezesek/{jelentkezo}', [JelentkezesController::class, 'getJelentkezesek']);
-    
-    // egy jelentkezőnek a szakokra való jelentkezésének sorrendjét módosítja/beiratkozik
-    Route::patch('/jelentkezesek/sorrend/{jelentkezo}/{beiratkozik}', [JelentkezesController::class, 'updateSorrend']);
-    
-    // egy jelentkezőnek a jelenlegi státuszát kéri le
-    Route::get('/jelentkezes-allapot/{email}', [JelentkezesController::class, 'getJelentkezesAllapot']);
 
-    // egy jelentkező a törzsadatát módosítja
-    Route::put('/torzsadat-frissit/{jelentkezo_id}', [JelentkezoTorzsController::class, 'updateJelentkezoTorzs']);
 
-    // egy jelentkezőnek a kitöltött dokumentait kapja meg
-    Route::get('/dokumentumok', [DokumentumokController::class, 'getDokumentumok']);
-});
-
-    
 
 // Ügyintéző 
 Route::middleware(['auth:sanctum', Ugyintezo::class])
@@ -84,7 +84,21 @@ Route::middleware(['auth:sanctum', Ugyintezo::class])
 
         //Állapot változás
         Route::patch('/allapot-valtozas', [JelentkezesController::class, 'allapotValtozas']);
-        
+
+        /* ----------------------- Statisztika -----------------------*/
+
+        //hanyan jelentkeztek szakokra bontva
+        Route::get("/jelentkezok-szama-statisztika", [SzakController::class, 'jelentkezokSzamaSzakraStat']);
+
+        //hanyan jelentkeztek nappali illetve esti tagozat-ra szakokra bontva
+        Route::get("/jelentkezok-tagozatra-bontva", [SzakController::class, 'jelentkezokTagozatonkent']);
+
+        //jelentkezok közül hányat fogadtunk el, össz
+        Route::get("/jelentkezok-osszesen-elfogadva", [JelentkezesController::class, 'elfogadottakSzama']);
+
+        //jelentkezok közül hányat fogadtunk el, szakokra bontva
+        Route::get("/jelentkezok-szakonkent-elfogadva", [JelentkezesController::class, 'elfogadottakSzamaSzakonkent']);
+
     });
 
 
