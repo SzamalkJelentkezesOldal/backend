@@ -82,11 +82,14 @@ class JelentkezoTorzsController extends Controller
     }
 
     public function updateJelentkezoTorzs(Request $request, $jelentkezo_id) {
+
+        $torzsAdat = JelentkezoTorzs::where('jelentkezo_id', $jelentkezo_id)->firstOrFail();
+
         $rules = [
             'vezeteknev' => 'required|string|max:255',
             'keresztnev' => 'required|string|max:255',
-            'adoazonosito' => 'nullable|string|max:20|unique:jelentkezo_torzs,adoazonosito',
-            'taj_szam' => 'nullable|string|max:20|unique:jelentkezo_torzs,taj_szam',
+            'adoazonosito' => 'nullable|string|max:20|unique:jelentkezo_torzs,adoazonosito,'.$torzsAdat->jelentkezo_id.',jelentkezo_id',
+            'taj_szam'     => 'nullable|string|max:20|unique:jelentkezo_torzs,taj_szam,'.$torzsAdat->jelentkezo_id.',jelentkezo_id',
             'lakcim' => 'required|string|max:255',
             'szuletesi_hely' => 'required|string|max:255',
             'szuletesi_nev' => 'nullable|string|max:255',
@@ -95,8 +98,13 @@ class JelentkezoTorzsController extends Controller
             'anyja_neve' => 'nullable|string|max:255',
         ];
 
-        $torzsAdat = JelentkezoTorzs::where('jelentkezo_id', $jelentkezo_id)->firstOrFail();
         $validated = $request->validate($rules);
+
+        if (strtolower($validated['allampolgarsag']) !== 'magyar') {
+            $validated['adoazonosito'] = null;
+            $validated['taj_szam'] = null;
+        }
+
         $torzsAdat->update($validated);
         
         return $torzsAdat;

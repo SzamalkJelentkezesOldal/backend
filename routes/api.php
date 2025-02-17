@@ -20,6 +20,8 @@ Route::get('/szakok-szama/{id}', [JelentkezesController::class, 'countJelentkeze
 Route::get('/jelentkezo-adatai/{email}', [JelentkezoTorzsController::class, 'getJelentkezoAdatok']);
 
 
+
+
 // Jelentkező
 Route::middleware(['auth:sanctum'])
 ->group(function () {
@@ -45,10 +47,17 @@ Route::middleware(['auth:sanctum'])
     Route::get('/jelentkezes-allapot/{email}', [JelentkezesController::class, 'getJelentkezesAllapot']);
 
     // egy jelentkező a törzsadatát módosítja
-    Route::put('/torzsadat-frissit/{jelentkezo_id}', [JelentkezoTorzsController::class, 'updateJelentkezoTorzs']);
+    Route::patch('/torzsadat-frissit/{jelentkezo_id}', [JelentkezoTorzsController::class, 'updateJelentkezoTorzs']);
 
     // egy jelentkezőnek a kitöltött dokumentait kapja meg
     Route::get('/dokumentumok', [DokumentumokController::class, 'getDokumentumok']);
+
+    // egy jelentkezőnek egy adott dokumentumját törli
+    Route::delete('/dokumentumok', [DokumentumokController::class, 'deleteDokumentum']);
+
+    // file preview
+    Route::get('/dokumentumok/preview', [DokumentumokController::class, 'previewDokumentum']);
+
 });
 
     

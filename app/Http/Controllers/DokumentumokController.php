@@ -82,41 +82,99 @@ class DokumentumokController extends Controller
 
     public function dokumentumokFeltolt(DokumentumokFeltoltRequest $request)
     {
-        Log::info($request);
         $validated = $request->validated();
         $jelentkezoId = Auth::user()->jelentkezo->id;
-    
-        try {
-            foreach ($validated as $field => $files) {
-                $tipusNev = $this->getTipusNev($field);
-                $tipus = DokumentumTipus::firstOrCreate(['elnevezes' => $tipusNev]);
-                
-                $paths = [];
-                foreach ($files as $file) {
-                    $paths[] = $file->store(
-                        "dokumentumok/{$jelentkezoId}/{$tipus->id}", 
-                        'private'
-                    );
-                }
-    
-                Dokumentumok::updateOrCreate(
-                    [
-                        'jelentkezo_id' => $jelentkezoId,
-                        'dokumentum_tipus_id' => $tipus->id
-                    ],
-                    ['fajlok' => json_encode($paths)]
-                );
+
+       
+        // Ellenőrizd a kötelező mezőket (új fájl vagy current érték kell legyen)
+        $requiredFields = [
+            'adoazonosito', 'taj', 'szemelyi_elso', 'szemelyi_hatso',
+            'lakcim_elso', 'lakcim_hatso', 'onarckep', 'nyilatkozatok'
+        ];
+        foreach ($requiredFields as $field) {
+            $current = json_decode($request->input($field . '_current') ?? '[]', true);
+           
+            if (!$request->hasFile($field) && empty($current)) {
+               
+                return response()->json(['error' => "A {$field} fájl kötelező"], 422);
             }
-    
+        }
+
+        try {
+            $allFields = [
+                "adoazonosito", "taj", "szemelyi_elso", "szemelyi_hatso",
+                "lakcim_elso", "lakcim_hatso", "onarckep", "nyilatkozatok",
+                "erettsegik", "tanulmanyik", "specialisok",
+            ];
+
+            foreach ($allFields as $field) {
+               
+                // Olvassuk be a frontend által küldött current értéket
+                $keptKey = $field . '_current';
+                $keptFiles = $request->has($keptKey)
+                    ? json_decode($request->input($keptKey), true)
+                    : [];
+             
+
+                // Az adott dokumentum típusának lekérése
+                $tipusNev = $this->getTipusNev($field);
+               
+                $tipus = DokumentumTipus::firstOrCreate(['elnevezes' => $tipusNev]);
+              
+
+                // Logoljuk, hogy mely rekordot kapunk a Dokumentumok táblából
+                $dokRecord = Dokumentumok::where('jelentkezo_id', $jelentkezoId)
+                                ->where('dokumentum_tipus_id', $tipus->id)
+                                ->first();
+                
+                $oldFiles = $dokRecord ? json_decode($dokRecord->fajlok, true) : [];
+              
+                // Töröljük azokat a fájlokat, amelyek korábban léteztek, de már nem szerepelnek a kept listában
+                $removedFiles = array_diff($oldFiles, $keptFiles);
+              
+                foreach ($removedFiles as $filePath) {
+                    
+                    Storage::disk('private')->delete($filePath);
+                }
+
+                // Új fájlok feltöltése
+                $newPaths = [];
+                if ($request->hasFile($field)) {
+                    foreach ($request->file($field) as $file) {
+                        $storedPath = $file->store("dokumentumok/{$jelentkezoId}/{$tipus->id}", 'private');
+                        $newPaths[] = $storedPath;
+                       
+                    }
+                }
+
+                // A végleges lista: a kept fájlok + az új feltöltöttek
+                $finalPaths = array_merge($keptFiles, $newPaths);
+              
+                if (!empty($finalPaths)) {
+                    Dokumentumok::updateOrCreate(
+                        [
+                            'jelentkezo_id' => $jelentkezoId,
+                            'dokumentum_tipus_id' => $tipus->id
+                        ],
+                        ['fajlok' => json_encode($finalPaths)]
+                    );
+                } else {
+                    if ($dokRecord) {
+                        $dokRecord->delete();
+                        Log::info("Deleted Dokumentum record for field", ['field' => $field]);
+                    }
+                }
+            }
+
             return response()->json(['message' => 'Dokumentumok sikeresen mentve']);
-    
         } catch (\Exception $e) {
-            Log::error('Dokumentum feltöltési hiba: '.$e->getMessage());
-            return response()->json([
-                'error' => 'Szerverhiba: '.$e->getMessage()
-            ], 500);
+            Log::error('Dokumentum feltöltési hiba: ' . $e->getMessage());
+            return response()->json(['error' => 'Szerverhiba: ' . $e->getMessage()], 500);
         }
     }
+
+
+
 
     public function getDokumentumok()
     {
@@ -125,16 +183,47 @@ class DokumentumokController extends Controller
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
-        $dokumentumok = Dokumentumok::with('dokumentumTipus')
+        $dokumentumok = Dokumentumok::with('tipus')
             ->where('jelentkezo_id', $user->jelentkezo->id)
             ->get()
             ->mapWithKeys(function ($item) {
-                return [$this->getTipusNev($item->dokumentumTipus->elnevezes) => json_decode($item->fajlok)];
+                return [$this->getTipusAzonosito($item->tipus->elnevezes) => json_decode($item->fajlok)];
             });
 
         return response()->json($dokumentumok);
     }
 
+
+    public function previewDokumentum(Request $request)
+    {
+        $path = $request->query('path');
+        
+        if (!Storage::disk('private')->exists($path)) {
+            return response()->json(['error' => 'Fájl nem található'], 404);
+        }
+        
+        return response()->file(Storage::disk('private')->path($path));
+    }
+
+
+    private function getTipusAzonosito($tipusNev)
+    {
+        $map = [
+            'Adóigazolvány' => 'adoazonosito',
+            'TAJ kártya' => 'taj',
+            'Személyazonosító igazolvány első oldala' => 'szemelyi_elso',
+            'Személyazonosító igazolvány hátsó oldala' => 'szemelyi_hatso',
+            'Lakcímet igazoló igazolvány első oldala' => 'lakcim_elso',
+            'Lakcímet igazoló igazolvány hátsó oldala' => 'lakcim_hatso',
+            'Önarckép' => 'onarckep',
+            'Nyilatkozatok' => 'nyilatkozatok',
+            'Érettségi bizonyítvány' => 'erettsegik',
+            'Tanulmányi dokumentumok' => 'tanulmanyik',
+            'SNI/BTMN' => 'specialisok'
+        ];
+        
+        return $map[$tipusNev] ?? 'Ismeretlen dokumentum típus';
+    }
 
     private function getTipusNev($mezoNev)
     {
@@ -146,7 +235,7 @@ class DokumentumokController extends Controller
             'lakcim_elso' => 'Lakcímet igazoló igazolvány első oldala',
             'lakcim_hatso' => 'Lakcímet igazoló igazolvány hátsó oldala',
             'onarckep' => 'Önarckép',
-            'nyilatkozatok' => 'Nyilatkozazok',
+            'nyilatkozatok' => 'Nyilatkozatok',
             'erettsegik' => 'Érettségi bizonyítvány',
             'tanulmanyik' => 'Tanulmányi dokumentumok',
             'specialisok' => 'SNI/BTMN'

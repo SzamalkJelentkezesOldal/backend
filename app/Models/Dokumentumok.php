@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Dokumentumok extends Model
 {
-    protected $primaryKey = 'jelentkezo_id';
     /** @use HasFactory<\Database\Factories\DokumentumokFactory> */
     use HasFactory;
     protected $fillable = [
@@ -24,6 +23,6 @@ class Dokumentumok extends Model
     
     public function tipus()
     {
-        return $this->belongsTo(DokumentumTipus::class, 'dokumentum_id');
+        return $this->belongsTo(DokumentumTipus::class, 'dokumentum_tipus_id');
     }
 }
