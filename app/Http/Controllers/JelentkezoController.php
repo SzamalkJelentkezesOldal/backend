@@ -75,9 +75,73 @@ class JelentkezoController extends Controller
             ], 500);
         }
     }
-    public function index()
+    public function index(Request $request)
     {
-        return Jelentkezo::all();
+        $page = $request->input('page', 1);
+        $limit = $request->input('limit', 10);
+
+        // Lekérjük a jelentkezos rekordokat a megfelelő mezőkkel, eager loadolva a kapcsolódó jelentkezeseket és azok allapotszotarát.
+        $query = Jelentkezo::query()
+            ->select('id', 'nev', 'email')
+            ->with(['jelentkezesek' => function($q) {
+                // Rendezheted a sorrendet, ha szükséges:
+                $q->orderBy('sorrend', 'asc')->with('allapotszotar');
+            }]);
+
+        $totalCount = $query->count();
+        $applicants = $query->skip(($page - 1) * $limit)->take($limit)->get();
+
+        // Minden jelentkezőhöz kiszámoljuk az összefoglalt státuszt
+        $results = $applicants->map(function ($applicant) {
+            // Az összes kapcsolódó jelentkezes allapotszotar->elnevezes mezőit gyűjtjük össze
+            $statuses = $applicant->jelentkezesek->map(function($j) {
+                return $j->allapotszotar->elnevezes;
+            })->toArray();
+
+            $overallStatus = $this->osszefoglaltStatusz($statuses);
+
+            return [
+                'id' => $applicant->id,
+                'nev' => $applicant->nev,
+                'email' => $applicant->email,
+                'status' => $overallStatus,
+            ];
+        });
+
+        return response()->json([
+            'results' => $results,
+            'totalCount' => $totalCount,
+        ]);
+    }
+
+    /**
+     * Az összefoglalt státusz kiszámítása a következő szabályok szerint:
+     *
+     * - Ha valamelyik szakján "Módosításra vár" van, akkor: "Módosításra vár"
+     * - Ha mindegyik szakja "Elutasítva" (és legalább egy jelentkezés van), akkor: "Elutasítva"
+     * - Ha van legalább egy "Elfogadva", akkor: "Elfogadva"
+     * - Ha az összes szakja "Eldöntésre vár", akkor: "Eldöntésre vár"
+     * - Egyéb esetben: "Folyamatban"
+     */
+    private function osszefoglaltStatusz($statuses)
+    {
+        if (in_array('Módosításra vár', $statuses)) {
+            return 'Módosításra vár';
+        }
+        if (!empty($statuses) && array_reduce($statuses, function($carry, $status) {
+            return $carry && ($status === 'Elutasítva');
+        }, true)) {
+            return 'Elutasítva';
+        }
+        if (in_array('Elfogadva', $statuses)) {
+            return 'Elfogadva';
+        }
+        if (!empty($statuses) && array_reduce($statuses, function($carry, $status) {
+            return $carry && ($status === 'Eldöntésre vár');
+        }, true)) {
+            return 'Eldöntésre vár';
+        }
+        return 'Folyamatban';
     }
 
     public function nappaliJelentkezok()

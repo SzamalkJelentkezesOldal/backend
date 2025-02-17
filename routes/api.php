@@ -107,7 +107,6 @@ Route::middleware(['auth:sanctum', Ugyintezo::class])
 
         //jelentkezok közül hányat fogadtunk el, szakokra bontva
         Route::get("/jelentkezok-szakonkent-elfogadva", [JelentkezesController::class, 'elfogadottakSzamaSzakonkent']);
-
     });
 
 
