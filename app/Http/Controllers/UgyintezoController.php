@@ -39,12 +39,12 @@ class UgyintezoController extends Controller
 
     public function ugyintezoDelete(string $id)
     {
-        Ugyintezo::find($id)->delete();
+        User::find($id)->delete();
     }
 
     public function ugyintezoPatch(Request $request, string $id)
     {
-        $record = Ugyintezo::find($id);
+        $record = User::find($id);
         $record->fill($request->all());
         $record->save();
     }
