@@ -77,42 +77,91 @@ class JelentkezoController extends Controller
     }
     public function index(Request $request)
     {
-        $page = $request->input('page', 1);
-        $limit = $request->input('limit', 10);
+        $page   = $request->input('page', 1);
+        $limit  = $request->input('limit', 10);
+        $filter = $request->input('filter', 1); // 1 = Összes jelentkező, 2 = Csak jelentkezett, 3 = Beiratkozás alatt
 
-        // Lekérjük a jelentkezos rekordokat a megfelelő mezőkkel, eager loadolva a kapcsolódó jelentkezeseket és azok allapotszotarát.
         $query = Jelentkezo::query()
             ->select('id', 'nev', 'email')
-            ->with(['jelentkezesek' => function($q) {
-                // Rendezheted a sorrendet, ha szükséges:
-                $q->orderBy('sorrend', 'asc')->with('allapotszotar');
-            }]);
+            ->with([
+                'jelentkezesek' => function($q) {
+                    $q->orderBy('sorrend', 'asc')->with(['allapotszotar', 'szak']);
+                },
+                'torzsadatok',
+                'dokumentumok'  // Eager load a dokumentum típusra
+            ]);
+
+        if ($filter == 2) {
+            $query->whereNotIn('email', function($q) {
+                $q->select('email')->from('users');
+            });
+        } elseif ($filter == 3) {
+            $query->whereIn('email', function($q) {
+                $q->select('email')->from('users');
+            });
+        }
 
         $totalCount = $query->count();
         $applicants = $query->skip(($page - 1) * $limit)->take($limit)->get();
 
-        // Minden jelentkezőhöz kiszámoljuk az összefoglalt státuszt
-        $results = $applicants->map(function ($applicant) {
-            // Az összes kapcsolódó jelentkezes allapotszotar->elnevezes mezőit gyűjtjük össze
+        if ($filter == 1) {
+            $userEmails = DB::table('users')->pluck('email')->toArray();
+        } else {
+            $userEmails = ($filter == 3) ? $applicants->pluck('email')->toArray() : [];
+        }
+
+        $results = $applicants->map(function ($applicant) use ($filter, $userEmails) {
             $statuses = $applicant->jelentkezesek->map(function($j) {
                 return $j->allapotszotar->elnevezes;
             })->toArray();
 
-            $overallStatus = $this->osszefoglaltStatusz($statuses);
+            if ($filter == 2) {
+                $overallStatus = 'Jelentkezés alatt';
+            } elseif ($filter == 1) {
+                if (!in_array($applicant->email, $userEmails)) {
+                    $overallStatus = 'Jelentkezés alatt';
+                } else {
+                    $overallStatus = $this->osszefoglaltStatusz($statuses);
+                }
+            } elseif ($filter == 3) {
+                $overallStatus = $this->osszefoglaltStatusz($statuses);
+            }
+
+            $torzsadatok = in_array($applicant->email, $userEmails) ? $applicant->torzsadatok : null;
+
+            $dokumentumok = in_array($applicant->email, $userEmails) ? $applicant->dokumentumok->map(function($doc) {
+                // Feltételezzük, hogy a "fajlok" mező már array formátumban van (a casts miatt)
+                $files = $doc->fajlok;
+                $previewUrls = array_map(function($file) {
+                    // Itt a url() segédfüggvény használatával teljes URL-t állítunk elő.
+                    return url('storage/' . $file);
+                }, $files);
+
+                return [
+                    'id' => $doc->id,
+                    'dokumentumTipus' => $doc->tipus ? $doc->tipus->elnevezes : null,
+                    'fajlok' => $files,
+                    'previewUrls' => $previewUrls,
+                ];
+            })->toArray() : null;
 
             return [
-                'id' => $applicant->id,
-                'nev' => $applicant->nev,
-                'email' => $applicant->email,
-                'status' => $overallStatus,
+                'id'             => $applicant->id,
+                'nev'            => $applicant->nev,
+                'email'          => $applicant->email,
+                'status'         => $overallStatus,
+                'jelentkezesek'  => $applicant->jelentkezesek,
+                'torzsadatok'    => $torzsadatok,
+                'dokumentumok'   => $dokumentumok,
             ];
         });
 
         return response()->json([
-            'results' => $results,
+            'results'    => $results,
             'totalCount' => $totalCount,
         ]);
     }
+
 
     /**
      * Az összefoglalt státusz kiszámítása a következő szabályok szerint:

@@ -14,6 +14,10 @@ class Dokumentumok extends Model
         'dokumentum_tipus_id',
         'fajlok'
     ];
+    
+    protected $casts = [
+        'fajlok' => 'array',
+    ];
 
     public function jelentkezo()
     {

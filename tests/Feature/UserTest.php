@@ -67,4 +67,63 @@ class UserTest extends TestCase
         
         $this->assertDatabaseMissing('users', ['id' => $user->id]);
     }
+
+    public function test_ugyintezo_modositasa()
+    {
+        $masterUser = User::factory()->create([
+            'role' => 2,
+        ]);
+        
+        $ugyintezo = User::factory()->create([
+            'name' => 'Eredeti név',
+            'role' => 1,
+        ]);
+        
+        $data = [
+            'name' => 'Frissített név',
+        ];
+        
+        $response = $this->actingAs($masterUser)
+                         ->patchJson("/api/modosit-ugyintezo/" . $ugyintezo->id, $data);
+        
+        $response->assertStatus(200);
+        
+        $this->assertDatabaseHas('users', [
+            'id'   => $ugyintezo->id,
+            'name' => 'Frissített név',
+            'role' => 1,
+        ]);
+    }
+
+    public function test_ugyintezok_listazasa()
+    {
+       $masterUser = User::factory()->create([
+            'role' => 2,
+        ]);
+        
+        User::factory()->count(3)->create([
+            'role' => 1,
+        ]);
+        
+        User::factory()->count(2)->create([
+            'role' => 2,
+        ]);
+        
+        User::factory()->create([
+            'role' => 0,
+        ]);
+        
+        $response = $this->actingAs($masterUser)
+                        ->getJson("/api/ugyintezok");
+        
+        $response->assertStatus(200);
+        $responseData = $response->json();
+        
+        $expectedCount = User::whereIn("role", [1, 2])->count();
+        $this->assertCount($expectedCount, $responseData);
+        
+        foreach ($responseData as $user) {
+            $this->assertTrue(in_array($user["role"], [1, 2]));
+        }
+    }
 }
