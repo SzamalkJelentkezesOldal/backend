@@ -60,11 +60,11 @@ class UserTest extends TestCase
     public function test_ugyintezo_deletion(): void
     {
         $user = User::factory()->create();
-        $admin = User::factory()->create(['role' => 2]); 
+        $admin = User::factory()->create(['role' => 2]);
 
         $response = $this->actingAs($admin)->deleteJson("/api/delete-ugyintezo/{$user->id}");
         $response->assertStatus(200);
-        
+
         $this->assertDatabaseMissing('users', ['id' => $user->id]);
     }
 
