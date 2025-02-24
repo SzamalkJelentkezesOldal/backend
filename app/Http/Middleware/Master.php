@@ -16,7 +16,7 @@ class Master
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!Auth::check() || !(Auth::user()->role == 2)){
+        if (!Auth::check() || (Auth::user()->role < 2)){
             return response()->json(['message' => 'Unauthorized'], 403);
         }
         return $next($request);

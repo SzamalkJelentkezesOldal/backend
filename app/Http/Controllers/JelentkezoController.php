@@ -80,6 +80,8 @@ class JelentkezoController extends Controller
         $page   = $request->input('page', 1);
         $limit  = $request->input('limit', 10);
         $filter = $request->input('filter', 1); // 1 = Összes jelentkező, 2 = Csak jelentkezett, 3 = Beiratkozás alatt
+        $search = $request->input('search', '');
+        $searchField = $request->input('searchField', ''); 
 
         $query = Jelentkezo::query()
             ->select('id', 'nev', 'email')
@@ -90,6 +92,19 @@ class JelentkezoController extends Controller
                 'torzsadatok',
                 'dokumentumok'  // Eager load a dokumentum típusra
             ]);
+
+        if (!empty($search)) {
+            // Ha meg van adva, hogy melyik mezőben keressen
+            if (!empty($searchField) && in_array($searchField, ['nev', 'email'])) {
+                $query->where($searchField, 'like', "%{$search}%");
+            } else {
+                // Alapesetben keressen mindkét mezőben
+                $query->where(function($q) use ($search) {
+                    $q->where('nev', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                });
+            }
+        }
 
         if ($filter == 2) {
             $query->whereNotIn('email', function($q) {
@@ -130,12 +145,14 @@ class JelentkezoController extends Controller
             $torzsadatok = in_array($applicant->email, $userEmails) ? $applicant->torzsadatok : null;
 
             $dokumentumok = in_array($applicant->email, $userEmails) ? $applicant->dokumentumok->map(function($doc) {
-                // Feltételezzük, hogy a "fajlok" mező már array formátumban van (a casts miatt)
                 $files = $doc->fajlok;
+                if (!is_array($files)) {
+                    $files = json_decode($files, true) ?: [];
+                }
                 $previewUrls = array_map(function($file) {
-                    // Itt a url() segédfüggvény használatával teljes URL-t állítunk elő.
                     return url('storage/' . $file);
                 }, $files);
+
 
                 return [
                     'id' => $doc->id,

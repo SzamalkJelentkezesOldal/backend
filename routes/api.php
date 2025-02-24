@@ -59,15 +59,16 @@ Route::middleware(['auth:sanctum'])
     // file preview
     Route::get('/dokumentumok/preview', [DokumentumokController::class, 'previewDokumentum']);
 
+    
 });
 
 
-Route::get("/jelentkezok", [JelentkezoController::class, 'index']);
 
 // Ügyintéző 
 Route::middleware(['auth:sanctum', Ugyintezo::class])
 ->group(function () {
     //jelentkezők alapadatainak kilistázása
+    Route::get("/jelentkezok", [JelentkezoController::class, 'index']);
     
     //jelentkezes állapotának módosítása
 
