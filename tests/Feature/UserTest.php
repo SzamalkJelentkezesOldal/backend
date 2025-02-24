@@ -67,68 +67,63 @@ class UserTest extends TestCase
 
         $this->assertDatabaseMissing('users', ['id' => $user->id]);
     }
-    public function test_create_new_jelentkezo()
+
+    public function test_ugyintezo_modositasa()
     {
+        $masterUser = User::factory()->create([
+            'role' => 2,
+        ]);
+        
+        $ugyintezo = User::factory()->create([
+            'name' => 'Eredeti név',
+            'role' => 1,
+        ]);
+        
         $data = [
-            'jelentkezo' => [
-                'nev' => 'Példa Név',
-                'email' => 'pelda@example.com',
-                'tel' => '123456789',
-            ],
-            'jelentkezes' => [
-                'kivalasztottSzakok' => [1, 2] // Legalább egy szakot ki kell választani
-            ]
+            'name' => 'Frissített név',
         ];
-
-
-        $response = $this->postJson('/api/uj-jelentkezo', $data);
-
-        $response->assertStatus(201)
-            ->assertJson([
-                'message' => 'Sikeres jelentkezés!',
-            ]);
+        
+        $response = $this->actingAs($masterUser)
+                         ->patchJson("/api/modosit-ugyintezo/" . $ugyintezo->id, $data);
+        
+        $response->assertStatus(200);
+        
+        $this->assertDatabaseHas('users', [
+            'id'   => $ugyintezo->id,
+            'name' => 'Frissített név',
+            'role' => 1,
+        ]);
     }
-    public function test_get_jelentkezes_szama()
+
+    public function test_ugyintezok_listazasa()
     {
-        $szak_id = 1;  // Feltételezzük, hogy létezik egy szak 1-es ID-vel
-
-        $response = $this->getJson("/api/szakok-szama/{$szak_id}");
-
-        $response->assertStatus(200)
-            ->assertJsonStructure([
-                'jelentkezes_szama'  // A válasznak tartalmaznia kell a jelentkezések számát
-            ]);
-    }
-    public function test_torzsadat_feltoltes()
-    {
-        $data = [
-            'address' => 'Teszt utca 123',
-            'phone' => '123456789',
-            // add other necessary fields
-        ];
-
-        // Feltételezzük, hogy a jelentkező ID-ja 1
-        $response = $this->postJson('/api/torzsadat-feltolt', $data);
-
-        $response->assertStatus(200)
-            ->assertJson([
-                'message' => 'Törzsadatok sikeresen feltöltve.',
-            ]);
-    }
-    public function test_get_jelentkezesek_for_jelentkezo()
-    {
-        $jelentkezo_id = 1;  // Feltételezzük, hogy létezik egy jelentkező 1-es ID-vel
-
-        $response = $this->getJson("/api/jelentkezesek/{$jelentkezo_id}");
-
-        $response->assertStatus(200)
-            ->assertJsonStructure([
-                '*' => [  // Az egyes jelentkezések adatai
-                    'szak_id',
-                    'allapot',
-                    'datum',
-                    // Add other necessary fields
-                ]
-            ]);
+       $masterUser = User::factory()->create([
+            'role' => 2,
+        ]);
+        
+        User::factory()->count(3)->create([
+            'role' => 1,
+        ]);
+        
+        User::factory()->count(2)->create([
+            'role' => 2,
+        ]);
+        
+        User::factory()->create([
+            'role' => 0,
+        ]);
+        
+        $response = $this->actingAs($masterUser)
+                        ->getJson("/api/ugyintezok");
+        
+        $response->assertStatus(200);
+        $responseData = $response->json();
+        
+        $expectedCount = User::whereIn("role", [1, 2])->count();
+        $this->assertCount($expectedCount, $responseData);
+        
+        foreach ($responseData as $user) {
+            $this->assertTrue(in_array($user["role"], [1, 2]));
+        }
     }
 }

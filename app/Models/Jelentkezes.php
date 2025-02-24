@@ -23,6 +23,11 @@ class Jelentkezes extends Model
         return $this->belongsTo(Jelentkezo::class,'jelentkezo_id','id');
     }
 
+    public function allapotszotar()
+    {
+        return $this->belongsTo(Allapotszotar::class, 'allapot');
+    }
+
     public function szak()
     {
         return $this->belongsTo(Szak::class, 'szak_id');

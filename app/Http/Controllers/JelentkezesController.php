@@ -31,7 +31,7 @@ class JelentkezesController extends Controller
     {
         $szakonkentiElfogadottak = DB::table('jelentkezes')
             ->join('szaks', 'jelentkezes.szak_id', '=', 'szaks.id')
-            ->select('szaks.elnevezes as szak_nev','szaks.id' , DB::raw('COUNT(jelentkezes.jelentkezo_id) as elfogadottak_szama'))
+            ->select('szaks.elnevezes as szak_nev', 'szaks.id', DB::raw('COUNT(jelentkezes.jelentkezo_id) as elfogadottak_szama'))
             ->where('jelentkezes.allapot', '=', 'Elfogadva') // Csak az "Elfogadva" állapotú jelentkezések
             ->groupBy('szak_nev', 'szaks.id') // Csoportosítás szakonként
             ->get();
@@ -41,14 +41,14 @@ class JelentkezesController extends Controller
     public function allapotValtozas(Request $request)
     {
         $rules = [
-            'jelentkezo_id' => 'required|exists:jelentkezos,id', 
-            'szak_id' => 'required|exists:szaks,id', 
-            'allapot' => 'required|string|max:50', 
+            'jelentkezo_id' => 'required|exists:jelentkezos,id',
+            'szak_id' => 'required|exists:szaks,id',
+            'allapot' => 'required|string|max:50',
         ];
-    
+
         // Validáció
         $validator = Validator::make($request->all(), $rules);
-    
+
         // Ha a validáció sikertelen, hibaválaszt adunk vissza
         if ($validator->fails()) {
             return response()->json([
@@ -56,18 +56,18 @@ class JelentkezesController extends Controller
                 'errors' => $validator->errors(),
             ], 422);
         }
-    
+
         // Validált adatok lekérése
         $validated = $validator->validated();
-    
+
         // A jelentkezés állapotának frissítése az adott jelentkező és szak párosítás alapján
         DB::table('jelentkezes')
-            ->where('jelentkezo_id', $validated['jelentkezo_id']) 
-            ->where('szak_id', $validated['szak_id']) 
+            ->where('jelentkezo_id', $validated['jelentkezo_id'])
+            ->where('szak_id', $validated['szak_id'])
             ->update([
                 'allapot' => $validated['allapot'],
             ]);
-    
+
         return response()->json([
             'message' => 'Jelentkezés állapota frissítve.',
         ]);
@@ -78,9 +78,9 @@ class JelentkezesController extends Controller
         $jelentkezoId = DB::table('jelentkezos')->where('email', $email)->value('id');
 
         $jelentkezesek = Jelentkezes::where('jelentkezo_id', $jelentkezoId)
-        ->join('szaks', 'jelentkezes.szak_id', '=', 'szaks.id')
-        ->select('jelentkezes.sorrend', 'szaks.portfolio', 'szaks.elnevezes', 'jelentkezes.jelentkezo_id', 'jelentkezes.szak_id')
-        ->get();
+            ->join('szaks', 'jelentkezes.szak_id', '=', 'szaks.id')
+            ->select('jelentkezes.sorrend', 'szaks.portfolio', 'szaks.elnevezes', 'jelentkezes.jelentkezo_id', 'jelentkezes.szak_id')
+            ->get();
 
         return response()->json($jelentkezesek);
     }
@@ -89,9 +89,9 @@ class JelentkezesController extends Controller
     {
         try {
             Log::info('Params:', ['jelentkezo' => $jelentkezo, 'beiratkozik' => $beiratkozik]);
-            
+
             $jelentkezoRecord = DB::table('jelentkezos')->find($jelentkezo);
-            
+
             if (!$jelentkezoRecord) {
                 Log::error("Nem létező jelentkező: $jelentkezo");
                 return response()->json(['error' => 'Nem létező jelentkező'], 404);
@@ -119,16 +119,16 @@ class JelentkezesController extends Controller
 
                 // 2. Frissítés
                 $updateData = ['sorrend' => $jelentkezes['sorrend']];
-                
+
                 if ($beiratkozik) {
                     $ujAllapot = AllapotHelper::getId("Eldöntésre vár");
-                    
+
                     // 3. Ellenőrizzük az állapotot
                     if (!$ujAllapot) {
                         Log::error("Ismeretlen állapot: Eldöntésre vár");
                         throw new \Exception("Hibás állapot azonosító");
                     }
-                    
+
                     $updateData['allapot'] = $ujAllapot;
 
                     // 4. Státuszváltozás rögzítése
@@ -147,7 +147,6 @@ class JelentkezesController extends Controller
             }
 
             return response()->json(['message' => 'Sorrend sikeresen frissítve']);
-            
         } catch (\Exception $e) {
             Log::error('HIBA: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
             return response()->json([
@@ -156,14 +155,41 @@ class JelentkezesController extends Controller
         }
     }
 
-    public function getJelentkezesAllapot($email) {
+    public function getJelentkezesAllapot($email)
+    {
         $jelentkezo = DB::table('jelentkezos')->where('email', $email)->first();
 
         $allapot = Jelentkezes::where('jelentkezo_id', $jelentkezo->id)
-                    ->join('allapotszotars', 'jelentkezes.allapot', '=', 'allapotszotars.id')
-                    ->select('allapotszotars.elnevezes', 'jelentkezes.jelentkezo_id')->first();
+            ->join('allapotszotars', 'jelentkezes.allapot', '=', 'allapotszotars.id')
+            ->select('allapotszotars.elnevezes', 'jelentkezes.jelentkezo_id')->first();
 
         return response()->json($allapot);
     }
 
+    public function elfogadottakSzama()
+    {
+        $result = DB::table('jelentkezes as j')
+        ->selectRaw("
+            COUNT(*) as osszesen, 
+            COUNT( CASE WHEN j.allapot = (Select id from allapotszotars where elnevezes='Elfogadva') THEN 1 END) as elfogadottak")
+        ->join('szaks as sz', 'j.szak_id', '=', 'sz.id')
+        ->join('allapotszotars as a', 'a.id', '=', 'j.allapot')
+        ->get();
+
+    return $result;
+    }
+    public function elfogadottakSzamaSzakonkent()
+    {
+        $result = DB::table('jelentkezes as j')
+        ->selectRaw("
+            sz.elnevezes,
+            COUNT(*) as osszesen, 
+            COUNT( CASE WHEN j.allapot = (Select id from allapotszotars where elnevezes='Elfogadva') THEN 1 END) as elfogadottak")
+        ->join('szaks as sz', 'j.szak_id', '=', 'sz.id')
+        ->join('allapotszotars as a', 'a.id', '=', 'j.allapot')
+        ->groupBy('sz.elnevezes')
+        ->get();
+
+    return $result;
+    }
 }

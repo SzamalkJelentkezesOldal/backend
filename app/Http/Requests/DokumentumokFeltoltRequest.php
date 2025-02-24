@@ -22,21 +22,21 @@ class DokumentumokFeltoltRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'adoazonosito' => 'required|array|min:1',
+            'adoazonosito' => 'nullable|array',
             'adoazonosito.*' => 'file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'taj' => 'required|array|min:1',
+            'taj' => 'nullable|array',
             'taj.*' => 'file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'szemelyi_elso' => 'required|array|min:1',
+            'szemelyi_elso' => 'nullable|array',
             'szemelyi_elso.*' => 'file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'szemelyi_hatso' => 'required|array|min:1',
+            'szemelyi_hatso' => 'nullable|array',
             'szemelyi_hatso.*' => 'file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'lakcim_elso' => 'required|array|min:1',
+            'lakcim_elso' => 'nullable|array',
             'lakcim_elso.*' => 'file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'lakcim_hatso' => 'required|array|min:1',
+            'lakcim_hatso' => 'nullable|array',
             'lakcim_hatso.*' => 'file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'onarckep' => 'required|array|min:1',
+            'onarckep' => 'nullable|array',
             'onarckep.*' => 'file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'nyilatkozatok' => 'required|array|min:1',
+            'nyilatkozatok' => 'nullable|array',
             'nyilatkozatok.*' => 'file|mimes:pdf,jpg,jpeg,png|max:2048',
             'erettsegik' => 'sometimes|array',
             'erettsegik.*' => 'file|mimes:pdf,jpg,jpeg,png|max:2048',
@@ -46,4 +46,5 @@ class DokumentumokFeltoltRequest extends FormRequest
             'specialisok.*' => 'file|mimes:pdf,jpg,jpeg,png|max:2048',
         ];
     }
+    
 }

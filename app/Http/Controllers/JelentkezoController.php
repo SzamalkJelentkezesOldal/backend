@@ -75,9 +75,122 @@ class JelentkezoController extends Controller
             ], 500);
         }
     }
-    public function index()
+    public function index(Request $request)
     {
-        return Jelentkezo::all();
+        $page   = $request->input('page', 1);
+        $limit  = $request->input('limit', 10);
+        $filter = $request->input('filter', 1); // 1 = Összes jelentkező, 2 = Csak jelentkezett, 3 = Beiratkozás alatt
+
+        $query = Jelentkezo::query()
+            ->select('id', 'nev', 'email')
+            ->with([
+                'jelentkezesek' => function($q) {
+                    $q->orderBy('sorrend', 'asc')->with(['allapotszotar', 'szak']);
+                },
+                'torzsadatok',
+                'dokumentumok'  // Eager load a dokumentum típusra
+            ]);
+
+        if ($filter == 2) {
+            $query->whereNotIn('email', function($q) {
+                $q->select('email')->from('users');
+            });
+        } elseif ($filter == 3) {
+            $query->whereIn('email', function($q) {
+                $q->select('email')->from('users');
+            });
+        }
+
+        $totalCount = $query->count();
+        $applicants = $query->skip(($page - 1) * $limit)->take($limit)->get();
+
+        if ($filter == 1) {
+            $userEmails = DB::table('users')->pluck('email')->toArray();
+        } else {
+            $userEmails = ($filter == 3) ? $applicants->pluck('email')->toArray() : [];
+        }
+
+        $results = $applicants->map(function ($applicant) use ($filter, $userEmails) {
+            $statuses = $applicant->jelentkezesek->map(function($j) {
+                return $j->allapotszotar->elnevezes;
+            })->toArray();
+
+            if ($filter == 2) {
+                $overallStatus = 'Jelentkezés alatt';
+            } elseif ($filter == 1) {
+                if (!in_array($applicant->email, $userEmails)) {
+                    $overallStatus = 'Jelentkezés alatt';
+                } else {
+                    $overallStatus = $this->osszefoglaltStatusz($statuses);
+                }
+            } elseif ($filter == 3) {
+                $overallStatus = $this->osszefoglaltStatusz($statuses);
+            }
+
+            $torzsadatok = in_array($applicant->email, $userEmails) ? $applicant->torzsadatok : null;
+
+            $dokumentumok = in_array($applicant->email, $userEmails) ? $applicant->dokumentumok->map(function($doc) {
+                // Feltételezzük, hogy a "fajlok" mező már array formátumban van (a casts miatt)
+                $files = $doc->fajlok;
+                $previewUrls = array_map(function($file) {
+                    // Itt a url() segédfüggvény használatával teljes URL-t állítunk elő.
+                    return url('storage/' . $file);
+                }, $files);
+
+                return [
+                    'id' => $doc->id,
+                    'dokumentumTipus' => $doc->tipus ? $doc->tipus->elnevezes : null,
+                    'fajlok' => $files,
+                    'previewUrls' => $previewUrls,
+                ];
+            })->toArray() : null;
+
+            return [
+                'id'             => $applicant->id,
+                'nev'            => $applicant->nev,
+                'email'          => $applicant->email,
+                'status'         => $overallStatus,
+                'jelentkezesek'  => $applicant->jelentkezesek,
+                'torzsadatok'    => $torzsadatok,
+                'dokumentumok'   => $dokumentumok,
+            ];
+        });
+
+        return response()->json([
+            'results'    => $results,
+            'totalCount' => $totalCount,
+        ]);
+    }
+
+
+    /**
+     * Az összefoglalt státusz kiszámítása a következő szabályok szerint:
+     *
+     * - Ha valamelyik szakján "Módosításra vár" van, akkor: "Módosításra vár"
+     * - Ha mindegyik szakja "Elutasítva" (és legalább egy jelentkezés van), akkor: "Elutasítva"
+     * - Ha van legalább egy "Elfogadva", akkor: "Elfogadva"
+     * - Ha az összes szakja "Eldöntésre vár", akkor: "Eldöntésre vár"
+     * - Egyéb esetben: "Folyamatban"
+     */
+    private function osszefoglaltStatusz($statuses)
+    {
+        if (in_array('Módosításra vár', $statuses)) {
+            return 'Módosításra vár';
+        }
+        if (!empty($statuses) && array_reduce($statuses, function($carry, $status) {
+            return $carry && ($status === 'Elutasítva');
+        }, true)) {
+            return 'Elutasítva';
+        }
+        if (in_array('Elfogadva', $statuses)) {
+            return 'Elfogadva';
+        }
+        if (!empty($statuses) && array_reduce($statuses, function($carry, $status) {
+            return $carry && ($status === 'Eldöntésre vár');
+        }, true)) {
+            return 'Eldöntésre vár';
+        }
+        return 'Folyamatban';
     }
 
     public function nappaliJelentkezok()
