@@ -102,6 +102,9 @@ Route::middleware(['auth:sanctum', Ugyintezo::class])
     Route::get("/jelentkezok-szama-statisztika", [SzakController::class, 'jelentkezokSzamaSzakraStat']);
 
     //hanyan jelentkeztek nappali illetve esti tagozat-ra szakokra bontva
+    Route::get("/jelentkezok-tagozatra-szakra-bontva", [SzakController::class, 'jelentkezokTagozatonkentSzakonkent']);
+
+    //hanyan jelentkeztek nappali illetve esti tagozat-ra bontva
     Route::get("/jelentkezok-tagozatra-bontva", [SzakController::class, 'jelentkezokTagozatonkent']);
 
     //jelentkezok közül hányat fogadtunk el, össz
@@ -110,6 +113,7 @@ Route::middleware(['auth:sanctum', Ugyintezo::class])
     //jelentkezok közül hányat fogadtunk el, szakokra bontva
     Route::get("/jelentkezok-szakonkent-elfogadva", [JelentkezesController::class, 'elfogadottakSzamaSzakonkent']);
 });
+
 
 
 
