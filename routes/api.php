@@ -64,11 +64,11 @@ Route::middleware(['auth:sanctum'])
 
 
 
+Route::get("/jelentkezok", [JelentkezoController::class, 'index']);
 // Ügyintéző 
 Route::middleware(['auth:sanctum', Ugyintezo::class])
 ->group(function () {
     //jelentkezők alapadatainak kilistázása
-    Route::get("/jelentkezok", [JelentkezoController::class, 'index']);
     
     //jelentkezes állapotának módosítása
 

@@ -131,10 +131,10 @@ class JelentkezoController extends Controller
             })->toArray();
 
             if ($filter == 2) {
-                $overallStatus = 'Jelentkezés alatt';
+                $overallStatus = 'Jelentkezett';
             } elseif ($filter == 1) {
                 if (!in_array($applicant->email, $userEmails)) {
-                    $overallStatus = 'Jelentkezés alatt';
+                    $overallStatus = 'Jelentkezett';
                 } else {
                     $overallStatus = $this->osszefoglaltStatusz($statuses);
                 }
