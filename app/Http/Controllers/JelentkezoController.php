@@ -76,108 +76,123 @@ class JelentkezoController extends Controller
         }
     }
     public function index(Request $request)
-    {
-        $page   = $request->input('page', 1);
-        $limit  = $request->input('limit', 10);
-        $filter = $request->input('filter', 1); // 1 = Összes jelentkező, 2 = Csak jelentkezett, 3 = Beiratkozás alatt
-        $search = $request->input('search', '');
-        $searchField = $request->input('searchField', ''); 
+{
+    $page   = $request->input('page', 1);
+    $limit  = $request->input('limit', 10);
+    $filter = $request->input('filter', 1); // 1 = Összes jelentkező, 2 = Csak jelentkezett, 3 = Beiratkozás alatt
+    $search = $request->input('search', '');
+    $searchField = $request->input('searchField', ''); 
 
-        $query = Jelentkezo::query()
-            ->select('id', 'nev', 'email')
-            ->with([
-                'jelentkezesek' => function($q) {
-                    $q->orderBy('sorrend', 'asc')->with(['allapotszotar', 'szak']);
-                },
-                'torzsadatok',
-                'dokumentumok'  // Eager load a dokumentum típusra
-            ]);
+    $query = Jelentkezo::query()
+        ->select('id', 'nev', 'email', 'created_at')
+        ->with([
+            'user:id,email,created_at',
+            'jelentkezesek' => function($q) {
+                $q->select('id', 'jelentkezo_id', 'allapot', 'sorrend', 'updated_at')
+                  ->orderBy('sorrend', 'asc')
+                  ->with(['allapotszotar', 'szak']);
+            },
+            'torzsadatok',
+            'dokumentumok'
+        ]);
 
-        if (!empty($search)) {
-            // Ha meg van adva, hogy melyik mezőben keressen
-            if (!empty($searchField) && in_array($searchField, ['nev', 'email'])) {
-                $query->where($searchField, 'like', "%{$search}%");
-            } else {
-                // Alapesetben keressen mindkét mezőben
-                $query->where(function($q) use ($search) {
-                    $q->where('nev', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%");
-                });
-            }
+    if (!empty($search)) {
+        if (!empty($searchField) && in_array($searchField, ['nev', 'email'])) {
+            $query->where($searchField, 'like', "%{$search}%");
+        } else {
+            $query->where(function($q) use ($search) {
+                $q->where('nev', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
         }
+    }
+
+    if ($filter == 2) {
+        $query->whereNotIn('email', function($q) {
+            $q->select('email')->from('users');
+        });
+    } elseif ($filter == 3) {
+        $query->whereIn('email', function($q) {
+            $q->select('email')->from('users');
+        });
+    }
+
+    $totalCount = $query->count();
+    $applicants = $query->skip(($page - 1) * $limit)->take($limit)->get();
+
+    if ($filter == 1) {
+        $userEmails = DB::table('users')->pluck('email')->toArray();
+    } else {
+        $userEmails = ($filter == 3) ? $applicants->pluck('email')->toArray() : [];
+    }
+
+    $results = $applicants->map(function ($applicant) use ($filter, $userEmails) {
+        // Használjuk az optional() segédmetódust, hogy elkerüljük a null értéken történő property elérést
+        $statuses = $applicant->jelentkezesek->map(function($j) {
+            return optional($j->allapotszotar)->elnevezes;
+        })->toArray();
 
         if ($filter == 2) {
-            $query->whereNotIn('email', function($q) {
-                $q->select('email')->from('users');
-            });
-        } elseif ($filter == 3) {
-            $query->whereIn('email', function($q) {
-                $q->select('email')->from('users');
-            });
-        }
-
-        $totalCount = $query->count();
-        $applicants = $query->skip(($page - 1) * $limit)->take($limit)->get();
-
-        if ($filter == 1) {
-            $userEmails = DB::table('users')->pluck('email')->toArray();
-        } else {
-            $userEmails = ($filter == 3) ? $applicants->pluck('email')->toArray() : [];
-        }
-
-        $results = $applicants->map(function ($applicant) use ($filter, $userEmails) {
-            $statuses = $applicant->jelentkezesek->map(function($j) {
-                return $j->allapotszotar->elnevezes;
-            })->toArray();
-
-            if ($filter == 2) {
+            $overallStatus = 'Jelentkezett';
+        } elseif ($filter == 1) {
+            if (!in_array($applicant->email, $userEmails)) {
                 $overallStatus = 'Jelentkezett';
-            } elseif ($filter == 1) {
-                if (!in_array($applicant->email, $userEmails)) {
-                    $overallStatus = 'Jelentkezett';
-                } else {
-                    $overallStatus = $this->osszefoglaltStatusz($statuses);
-                }
-            } elseif ($filter == 3) {
+            } else {
                 $overallStatus = $this->osszefoglaltStatusz($statuses);
             }
+        } elseif ($filter == 3) {
+            $overallStatus = $this->osszefoglaltStatusz($statuses);
+        }
 
-            $torzsadatok = in_array($applicant->email, $userEmails) ? $applicant->torzsadatok : null;
+        $torzsadatok = in_array($applicant->email, $userEmails) ? $applicant->torzsadatok : null;
 
-            $dokumentumok = in_array($applicant->email, $userEmails) ? $applicant->dokumentumok->map(function($doc) {
-                $files = $doc->fajlok;
-                if (!is_array($files)) {
-                    $files = json_decode($files, true) ?: [];
-                }
-                $previewUrls = array_map(function($file) {
-                    return url('storage/' . $file);
-                }, $files);
-
-
-                return [
-                    'id' => $doc->id,
-                    'dokumentumTipus' => $doc->tipus ? $doc->tipus->elnevezes : null,
-                    'fajlok' => $files,
-                    'previewUrls' => $previewUrls,
-                ];
-            })->toArray() : null;
+        $dokumentumok = in_array($applicant->email, $userEmails) ? $applicant->dokumentumok->map(function($doc) {
+            $files = $doc->fajlok;
+            if (!is_array($files)) {
+                $files = json_decode($files, true) ?: [];
+            }
+            $previewUrls = array_map(function($file) {
+                return url('storage/' . $file);
+            }, $files);
 
             return [
-                'id'             => $applicant->id,
-                'nev'            => $applicant->nev,
-                'email'          => $applicant->email,
-                'status'         => $overallStatus,
-                'jelentkezesek'  => $applicant->jelentkezesek,
-                'torzsadatok'    => $torzsadatok,
-                'dokumentumok'   => $dokumentumok,
+                'id' => $doc->id,
+                'dokumentumTipus' => $doc->tipus ? $doc->tipus->elnevezes : null,
+                'fajlok' => $files,
+                'previewUrls' => $previewUrls,
+                'created_at' => $doc->created_at,
+            ];
+        })->toArray() : null;
+
+        $jelentkezesek = $applicant->jelentkezesek->map(function($j) {
+            return [
+                'id' => $j->id,
+                'sorrend' => $j->sorrend,
+                'updated_at' => $j->updated_at,
+                'allapotszotar' => $j->allapotszotar,
+                'allapot' => $j->allapot,
+                'szak' => $j->szak,
             ];
         });
 
-        return response()->json([
-            'results'    => $results,
-            'totalCount' => $totalCount,
-        ]);
-    }
+        return [
+            'id' => $applicant->id,
+            'nev' => $applicant->nev,
+            'email' => $applicant->email,
+            'beregisztralt' => $applicant->user ? $applicant->user->created_at : null,
+            'jelentkezett' => $applicant->created_at,
+            'status' => $overallStatus,
+            'jelentkezesek' => $jelentkezesek,
+            'torzsadatok' => $torzsadatok,
+            'dokumentumok' => $dokumentumok,
+        ];
+    });
+
+    return response()->json([
+        'results'    => $results,
+        'totalCount' => $totalCount,
+    ]);
+}
 
 
     /**

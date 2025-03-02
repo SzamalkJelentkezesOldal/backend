@@ -34,4 +34,9 @@ class Jelentkezo extends Model
     {
         return $this->hasOne(JelentkezoTorzs::class, 'jelentkezo_id', 'id');
     }
+
+    public function user()
+    {
+        return $this->hasOne(User::class, 'email', 'email');
+    }
 }
