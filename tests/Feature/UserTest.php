@@ -36,7 +36,7 @@ class UserTest extends TestCase
         $response = $this->actingAs($admin)->get('/api/jelentkezok');
         $response->assertStatus(200);
     }
-    public function test_email_must_be_unique()
+    public function test_email_egyediseg()
     {
         // Első felhasználó létrehozása egy adott email címmel
         User::create([
@@ -57,7 +57,7 @@ class UserTest extends TestCase
             'role' => 0,
         ]);
     }
-    public function test_ugyintezo_deletion(): void
+    public function test_ugyintezo_torles(): void
     {
         $user = User::factory()->create();
         $admin = User::factory()->create(['role' => 2]);
