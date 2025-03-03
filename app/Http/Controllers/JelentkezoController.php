@@ -88,7 +88,7 @@ class JelentkezoController extends Controller
         ->with([
             'user:id,email,created_at',
             'jelentkezesek' => function($q) {
-                $q->select('id', 'jelentkezo_id', 'allapot', 'sorrend', 'updated_at')
+                $q->select('id', 'jelentkezo_id', 'allapot', 'sorrend', 'szak_id', 'updated_at')
                   ->orderBy('sorrend', 'asc')
                   ->with(['allapotszotar', 'szak']);
             },
@@ -127,7 +127,6 @@ class JelentkezoController extends Controller
     }
 
     $results = $applicants->map(function ($applicant) use ($filter, $userEmails) {
-        // Használjuk az optional() segédmetódust, hogy elkerüljük a null értéken történő property elérést
         $statuses = $applicant->jelentkezesek->map(function($j) {
             return optional($j->allapotszotar)->elnevezes;
         })->toArray();
@@ -171,7 +170,8 @@ class JelentkezoController extends Controller
                 'updated_at' => $j->updated_at,
                 'allapotszotar' => $j->allapotszotar,
                 'allapot' => $j->allapot,
-                'szak' => $j->szak,
+                'szak' => $j->szak->elnevezes,
+                'tagozat' => $j->szak->nappali,
             ];
         });
 
