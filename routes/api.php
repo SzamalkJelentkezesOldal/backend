@@ -57,7 +57,7 @@ Route::middleware(['auth:sanctum'])
     Route::delete('/dokumentumok', [DokumentumokController::class, 'deleteDokumentum']);
 
     // file preview
-    Route::get('/dokumentumok/preview', [DokumentumokController::class, 'previewDokumentum']);
+    Route::get('/dokumentumok/preview', [DokumentumokController::class, 'previewDokumentum'])->name('dokumentum.preview');
 
     
 });

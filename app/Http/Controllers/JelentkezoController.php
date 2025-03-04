@@ -151,7 +151,7 @@ class JelentkezoController extends Controller
                 $files = json_decode($files, true) ?: [];
             }
             $previewUrls = array_map(function($file) {
-                return url('storage/' . $file);
+                return route('dokumentum.preview', ['path' => $file]);
             }, $files);
 
             return [
