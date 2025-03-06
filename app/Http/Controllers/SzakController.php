@@ -57,7 +57,7 @@ class SzakController extends Controller
         $result = DB::table('szaks as sz')
             ->join('jelentkezes as j', 'sz.id', '=', 'j.szak_id')
             ->join('jelentkezos as jo', 'j.jelentkezo_id', '=', 'jo.id')
-            ->selectRaw('sz.elnevezes,    COUNT(CASE WHEN nappali = 1 THEN 1 END) AS nappali,
+            ->selectRaw('sz.elnevezes, Count(*) as osszesen,   COUNT(CASE WHEN nappali = 1 THEN 1 END) AS nappali,
                             COUNT(CASE WHEN nappali = 0 THEN 1 END) AS esti')
             ->groupBy('sz.elnevezes')
             ->get();

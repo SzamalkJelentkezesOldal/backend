@@ -42,6 +42,9 @@ return new class extends Migration
         Allapotszotar::create([
             "elnevezes" => "Elutasítva"
         ]);
+        Allapotszotar::create([
+            "elnevezes" => "Lezárt"
+        ]);
 
         Artisan::call('cache:forget allapotszotar');
     }
