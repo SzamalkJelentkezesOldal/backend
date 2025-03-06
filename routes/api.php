@@ -5,6 +5,7 @@ use App\Http\Controllers\DokumentumTipusController;
 use App\Http\Controllers\JelentkezesController;
 use App\Http\Controllers\JelentkezoController;
 use App\Http\Controllers\JelentkezoTorzsController;
+use App\Http\Controllers\ModositasKerelemMailController;
 use App\Http\Controllers\SzakController;
 use App\Http\Controllers\UgyintezoController;
 use App\Http\Middleware\Master;
@@ -95,6 +96,9 @@ Route::middleware(['auth:sanctum', Ugyintezo::class])
 
     //Állapot változás
     Route::patch('/allapot-valtozas', [JelentkezesController::class, 'allapotValtozas']);
+
+    //Módosítás kérelem email küldése
+    Route::post('/modositas-kerelem-email', [ModositasKerelemMailController::class, 'emailKuldes']);
 
     /* ----------------------- Statisztika -----------------------*/
 
