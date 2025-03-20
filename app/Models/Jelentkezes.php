@@ -15,7 +15,7 @@ class Jelentkezes extends Model
         'szak_id',
         'jelentkezo_id',
         'allapot',
-        'sorrend'
+        'sorrend',
     ];
 
 
