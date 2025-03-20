@@ -145,6 +145,9 @@ Route::middleware(['auth:sanctum', Master::class])
     //Ugyintezok lekerese
     Route::get('/ugyintezok', [UgyintezoController::class, 'getUgyintezok']);
 });
+
+//Szakok
+    Route::post('/uj-szak', [UgyintezoController::class, 'postSzak']);
     
 
     //archiválás
