@@ -93,7 +93,8 @@ class JelentkezoController extends Controller
                   ->with(['allapotszotar', 'szak']);
             },
             'torzsadatok',
-            'dokumentumok'
+            'dokumentumok',
+            'portfolios' // itt kérjük le a portfóliókat is
         ]);
 
     if (!empty($search)) {
@@ -175,6 +176,17 @@ class JelentkezoController extends Controller
             ];
         });
 
+        $portfoliok = $applicant->portfolios && $applicant->portfolios->count()
+            ? $applicant->portfolios->map(function($pf) {
+                return [
+                    'id' => $pf->id,
+                    'szak_id' => $pf->szak_id,
+                    'portfolio_url' => $pf->portfolio_url,
+                    'created_at' => $pf->created_at,
+                ];
+            })->toArray()
+            : null;
+
         return [
             'id' => $applicant->id,
             'nev' => $applicant->nev,
@@ -185,6 +197,7 @@ class JelentkezoController extends Controller
             'jelentkezesek' => $jelentkezesek,
             'torzsadatok' => $torzsadatok,
             'dokumentumok' => $dokumentumok,
+            'portfoliok' => $portfoliok, 
         ];
     });
 
@@ -193,6 +206,7 @@ class JelentkezoController extends Controller
         'totalCount' => $totalCount,
     ]);
 }
+
 
 
     /**

@@ -39,4 +39,10 @@ class Jelentkezo extends Model
     {
         return $this->hasOne(User::class, 'email', 'email');
     }
+
+    public function portfolios()
+    {
+        return $this->hasMany(Portfolio::class, 'jelentkezo_id');
+    }
+
 }
