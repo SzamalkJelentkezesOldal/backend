@@ -123,6 +123,9 @@ Route::middleware(['auth:sanctum', Ugyintezo::class])
     //Havi regisztrációk száma a jelenlegi évben, szakonként választható
     Route::get("/jelentkezok-havi-regisztracio/{szak}", [JelentkezesController::class, 'haviRegisztraciokSzakonkent']);
 
+    //Szak
+    
+
 });
 
 
@@ -144,10 +147,20 @@ Route::middleware(['auth:sanctum', Master::class])
 
     //Ugyintezok lekerese
     Route::get('/ugyintezok', [UgyintezoController::class, 'getUgyintezok']);
+
+
+    //Szak felvétele
+    Route::post('/uj-szak', [SzakController::class, 'postSzak']);
+
+     //Szak törlése
+     Route::delete('/delete-szak/{id}', [SzakController::class, 'szakDelete']);
+
+     //Szak módosítás
+     Route::patch('/modosit-szak/{id}', [Szak::class, 'szakPatch']);
 });
 
-//Szakok
-    Route::post('/uj-szak', [UgyintezoController::class, 'postSzak']);
+
+    
     
 
     //archiválás
