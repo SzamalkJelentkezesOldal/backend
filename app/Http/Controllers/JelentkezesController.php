@@ -176,6 +176,8 @@ class JelentkezesController extends Controller
         ->join('allapotszotars as a', 'a.id', '=', 'j.allapot')
         ->get();
 
+
+
     return $result;
     }
     public function elfogadottakSzamaSzakonkent()
@@ -191,5 +193,40 @@ class JelentkezesController extends Controller
         ->get();
 
     return $result;
+    }
+    public function haviRegisztraciok(){
+
+        // Jelentkezések száma havonta, szakonként
+        $jelentkezesek = DB::table('jelentkezes')
+        ->join('szaks', 'jelentkezes.szak_id', '=', 'szaks.id')
+        ->select(
+
+            DB::raw('MONTH(jelentkezes.created_at) as honap'),
+            DB::raw('count(jelentkezes.id) as jelentkezesek_szama')
+        )
+        ->whereRaw('YEAR(jelentkezes.created_at) = YEAR(NOW())')
+        ->groupBy('honap')
+        ->orderBy('honap')
+        ->get();
+
+        return $jelentkezesek;
+    }
+    
+    public function haviRegisztraciokSzakonkent($szak){
+
+        // Jelentkezések száma havonta, szakonként
+        $jelentkezesek = DB::table('jelentkezes')
+        ->join('szaks', 'jelentkezes.szak_id', '=', 'szaks.id')
+        ->select(
+            DB::raw('MONTH(jelentkezes.created_at) as honap'),
+            DB::raw('count(jelentkezes.id) as jelentkezesek_szama')
+        )
+        ->where('szaks.id', $szak) // Szűrés a megadott szak ID-ra
+        ->whereYear('jelentkezes.created_at', now()->year) // Szűrés az aktuális évre
+        ->groupBy('honap')
+        ->orderBy('honap')
+        ->get();
+
+        return $jelentkezesek;
     }
 }

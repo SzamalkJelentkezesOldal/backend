@@ -16,6 +16,24 @@ class SzakController extends Controller
         return $szakok;
     }
 
+    public function postSzak(Request $request)
+    {
+        $ellenorzottAdatok = $request->validate([
+            'elnevezes' => 'required|string|max:255',
+            'portfolio' => 'required|string',
+            'nappali' => 'boolean',
+        ]);
+
+   
+        $ujSzak = Szak::create([
+            'elnevezes' => $ellenorzottAdatok['elnevezes'],
+            'portfolio' => Hash::make($ellenorzottAdatok['portfolio']),
+            'nappali' => $ellenorzottAdatok['nappali'] ? 2 : 1, 
+        ]);
+
+        return response()->json($ujSzak);
+    }
+
     public function getJelentkezokSzakra(String $szak)
     {
         //Ki az aki paraméterben kapott szakra jelentkezett
