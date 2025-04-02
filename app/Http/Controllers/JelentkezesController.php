@@ -229,4 +229,30 @@ class JelentkezesController extends Controller
 
         return $jelentkezesek;
     }
+
+
+    public function jelentkezesEldontese($id, $ujAllapot) {        
+        $jelentkezes = Jelentkezes::findOrFail($id);
+    
+        $oldAllapot = $jelentkezes->allapot;
+        $ujAllapot = (int) $ujAllapot; 
+
+        $jelentkezes->allapot = $ujAllapot;
+        $jelentkezes->save();
+
+        $frissitettJelentkezes = Jelentkezes::with(['allapotszotar'])->find($id);
+        
+        Statuszvaltozas::create([
+            'jelentkezo_id' => $jelentkezes->jelentkezo_id,
+            'szak_id'       => $jelentkezes->szak_id,
+            'regi_allapot'  => $oldAllapot,
+            'uj_allapot'    => $ujAllapot,
+            'user_id'       => Auth::check() ? Auth::id() : null,
+        ]);
+        
+        return response()->json([
+            'message' => 'Jelentkezés állapota sikeresen frissítve.',
+            'data' => $frissitettJelentkezes
+        ]);
+    }
 }

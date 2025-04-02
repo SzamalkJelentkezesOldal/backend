@@ -174,6 +174,8 @@ class JelentkezoController extends Controller
                     'updated_at' => $j->updated_at,
                     'allapotszotar' => $j->allapotszotar,
                     'allapot' => $j->allapot,
+                    'jelentkezo_id' => $j->jelentkezo_id,
+                    'szak_id' => $j->szak->id,
                     'szak' => $j->szak->elnevezes,
                     'tagozat' => $j->szak->nappali,
                 ];

@@ -86,7 +86,6 @@ class DokumentumokController extends Controller
         $jelentkezoId = Auth::user()->jelentkezo->id;
 
        
-        // Ellenőrizd a kötelező mezőket (új fájl vagy current érték kell legyen)
         $requiredFields = [
             'adoazonosito', 'taj', 'szemelyi_elso', 'szemelyi_hatso',
             'lakcim_elso', 'lakcim_hatso', 'onarckep', 'nyilatkozatok'
@@ -109,27 +108,24 @@ class DokumentumokController extends Controller
 
             foreach ($allFields as $field) {
                
-                // Olvassuk be a frontend által küldött current értéket
+                // beolvassuk a megtartott fájlokat
                 $keptKey = $field . '_current';
                 $keptFiles = $request->has($keptKey)
                     ? json_decode($request->input($keptKey), true)
                     : [];
              
 
-                // Az adott dokumentum típusának lekérése
                 $tipusNev = $this->getTipusNev($field);
                
                 $tipus = DokumentumTipus::firstOrCreate(['elnevezes' => $tipusNev]);
               
 
-                // Logoljuk, hogy mely rekordot kapunk a Dokumentumok táblából
                 $dokRecord = Dokumentumok::where('jelentkezo_id', $jelentkezoId)
                                 ->where('dokumentum_tipus_id', $tipus->id)
                                 ->first();
                 
                 $oldFiles = $dokRecord ? json_decode($dokRecord->fajlok, true) : [];
               
-                // Töröljük azokat a fájlokat, amelyek korábban léteztek, de már nem szerepelnek a kept listában
                 $removedFiles = array_diff($oldFiles, $keptFiles);
               
                 foreach ($removedFiles as $filePath) {
@@ -137,7 +133,6 @@ class DokumentumokController extends Controller
                     Storage::disk('private')->delete($filePath);
                 }
 
-                // Új fájlok feltöltése
                 $newPaths = [];
                 if ($request->hasFile($field)) {
                     foreach ($request->file($field) as $file) {
@@ -147,7 +142,6 @@ class DokumentumokController extends Controller
                     }
                 }
 
-                // A végleges lista: a kept fájlok + az új feltöltöttek
                 $finalPaths = array_merge($keptFiles, $newPaths);
               
                 if (!empty($finalPaths)) {

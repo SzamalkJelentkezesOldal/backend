@@ -100,6 +100,9 @@ Route::middleware(['auth:sanctum', Ugyintezo::class])
     //Módosítás kérelem email küldése
     Route::post('/modositas-kerelem-email', [ModositasKerelemMailController::class, 'emailKuldes']);
 
+    // jelentkezés elfogadásas/elutasítása
+    Route::patch('/jelentkezes-eldontese/{id}/{ujAllapot}', [JelentkezesController::class, 'jelentkezesEldontese']);
+
     /* ----------------------- Statisztika -----------------------*/
 
     //hanyan jelentkeztek szakokra bontva

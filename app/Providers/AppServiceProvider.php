@@ -3,9 +3,11 @@
 namespace App\Providers;
 
 use App\Models\Dokumentumok;
+use App\Models\Jelentkezes;
 use App\Models\JelentkezoTorzs;
 use App\Models\User;
 use App\Observers\DokumentumokObserver;
+use App\Observers\JelentkezesObserver;
 use App\Observers\JelentkezoTorzsObserver;
 use App\Observers\UserObserver;
 use Illuminate\Auth\Notifications\ResetPassword;

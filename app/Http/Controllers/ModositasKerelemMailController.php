@@ -9,6 +9,7 @@ use App\Models\Jelentkezes;
 use App\Models\Jelentkezo;
 use App\Models\Statuszvaltozas;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 
 class ModositasKerelemMailController extends Controller
@@ -49,7 +50,7 @@ class ModositasKerelemMailController extends Controller
                         'szak_id'        => $jelentkezes->szak_id,
                         'regi_allapot'   => $eldontesreVarID,
                         'uj_allapot'     => $modositasraVarID,
-                        'user_id'        => auth()->id() ?? null,
+                        'user_id'        => Auth::check() ? Auth::id() : null,
                     ]);
                 }
             }
