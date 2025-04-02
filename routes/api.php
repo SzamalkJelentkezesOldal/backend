@@ -156,7 +156,7 @@ Route::middleware(['auth:sanctum', Master::class])
      Route::delete('/delete-szak/{id}', [SzakController::class, 'szakDelete']);
 
      //Szak módosítás
-     Route::patch('/modosit-szak/{id}', [Szak::class, 'szakPatch']);
+     Route::patch('/modosit-szak/{id}', [SzakController::class, 'szakPatch']);
 });
 
 
