@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use App\Models\Szak;
 
 class SzakController extends Controller
 {
@@ -20,18 +22,30 @@ class SzakController extends Controller
     {
         $ellenorzottAdatok = $request->validate([
             'elnevezes' => 'required|string|max:255',
-            'portfolio' => 'required|string',
-            'nappali' => 'boolean',
+            'portfolio' => 'required|boolean',
+            'nappali' => 'required|boolean',
         ]);
 
    
         $ujSzak = Szak::create([
             'elnevezes' => $ellenorzottAdatok['elnevezes'],
-            'portfolio' => Hash::make($ellenorzottAdatok['portfolio']),
-            'nappali' => $ellenorzottAdatok['nappali'] ? 2 : 1, 
+            'portfolio' => $ellenorzottAdatok['portfolio'],
+            'nappali' => $ellenorzottAdatok['nappali'],
         ]);
 
         return response()->json($ujSzak);
+    }
+
+    public function szakDelete(string $id)
+    {
+        Szak::find($id)->delete();
+    }
+
+    public function szakPatch(Request $request, string $id)
+    {
+        $record = Szak::find($id);
+        $record->fill($request->all());
+        $record->save();
     }
 
     public function getJelentkezokSzakra(String $szak)

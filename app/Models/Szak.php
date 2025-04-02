@@ -9,6 +9,9 @@ class Szak extends Model
 {
     /** @use HasFactory<\Database\Factories\SzakFactory> */
     use HasFactory;
+
+    protected $table = 'szaks';
+   
     protected $fillable = [
         'elnevezes',
         'portfolio',
