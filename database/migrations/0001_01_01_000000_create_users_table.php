@@ -38,11 +38,11 @@ return new class extends Migration
             $table->integer('last_activity')->index();
         });
 
-        User::create([
+       /* User::create([
             'name' => 'Kovács János', 
             'email' => 'jani@gmail.com', 
             'password' => bcrypt('asdasdasd'), 
-        ]);
+        ]);*/
 
         User::create([
             'name' => 'Ügyintéző', 

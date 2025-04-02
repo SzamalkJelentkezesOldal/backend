@@ -2,11 +2,22 @@
 
 namespace Tests\Feature;
 
+use App\Http\Middleware\Master;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class UserTest extends TestCase
 {
+    use RefreshDatabase; // Automatikusan újratelepíti az adatbázist minden teszt előtt
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Seedelés futtatása minden teszt előtt
+        $this->artisan('migrate:fresh --seed');
+    }
     /**
      * A basic feature test example.
      */
@@ -33,7 +44,7 @@ class UserTest extends TestCase
             'password' => 'asdasdasd',
             'role' => 2,
         ]);
-        $response = $this->actingAs($admin)->get('/api/jelentkezok');
+        $response = $this->withMiddleware([\App\Http\Middleware\Master::class,])->get('/api/jelentkezok');
         $response->assertStatus(200);
     }
     public function test_email_egyediseg()
@@ -61,26 +72,35 @@ class UserTest extends TestCase
     {
         $user = User::factory()->create();
         $admin = User::factory()->create(['role' => 2]);
+        $keresendoId = $user->id;
 
         $response = $this->actingAs($admin)->deleteJson("/api/delete-ugyintezo/{$user->id}");
         $response->assertStatus(200);
 
-        $this->assertDatabaseMissing('users', ['id' => $user->id]);
+        $this->assertDatabaseMissing('users', ['id' => $keresendoId]);
     }
 
     public function test_ugyintezo_modositasa()
     {
-        $masterUser = User::factory()->create([
+        $masterUser = User::create([
+            'name' => 'Teszt Master',
+            'email' => 'tesztMaster@teszt.com',
+            'password' => bcrypt('asdasdasd'),
             'role' => 2,
         ]);
         
-        $ugyintezo = User::factory()->create([
+        $ugyintezo = User::create([
             'name' => 'Eredeti név',
+            'email' => 'eredeti@teszt.com',
+            'password' => bcrypt('asdasdasd'),
             'role' => 1,
         ]);
         
         $data = [
             'name' => 'Frissített név',
+            'email' => 'frissitett@teszt.com',
+            'password' => bcrypt('ujjelszo'),
+            'role' => 1,
         ];
         
         $response = $this->actingAs($masterUser)
@@ -91,6 +111,7 @@ class UserTest extends TestCase
         $this->assertDatabaseHas('users', [
             'id'   => $ugyintezo->id,
             'name' => 'Frissített név',
+            'email' => 'frissitett@teszt.com',
             'role' => 1,
         ]);
     }
