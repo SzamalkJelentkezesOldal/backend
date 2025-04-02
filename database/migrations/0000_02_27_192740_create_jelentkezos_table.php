@@ -20,12 +20,12 @@ return new class extends Migration
             $table->string("token");
             $table->timestamps();
         });
-        Jelentkezo::create([
+        /*Jelentkezo::create([
             "nev"=> "Kovács János",
             "email"=>"jani@gmail.com",
             "tel"=>'06202020200',
             "token"=>'agvdfsbgfndjbsgfjd',
-        ]);
+        ]);*/
     }
 
     /**

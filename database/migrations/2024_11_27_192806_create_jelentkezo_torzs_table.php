@@ -28,7 +28,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        JelentkezoTorzs::create([
+       /* JelentkezoTorzs::create([
             'jelentkezo_id' => 1, // A megadott jelentkezo_id
             'vezeteknev' => 'Kovács',
             'keresztnev' => 'János',
@@ -40,7 +40,7 @@ return new class extends Migration
             'szuletesi_datum' => '1999-07-15',
             'allampolgarsag' => 'magyar',
             'anyja_neve' => 'Nagy Ilona',
-        ]);
+        ]);*/
     }
 
     /**
