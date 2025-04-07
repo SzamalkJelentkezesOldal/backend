@@ -126,7 +126,13 @@ Route::middleware(['auth:sanctum', Ugyintezo::class])
     //Havi regisztrációk száma a jelenlegi évben, szakonként választható
     Route::get("/jelentkezok-havi-regisztracio/{szak}", [JelentkezesController::class, 'haviRegisztraciokSzakonkent']);
 
-    //Szak
+    //Egy jelentkező jelentkezéseinek archiválása
+    Route::patch("/jelentkezok-archivalas/{jelentkezo_email}", [JelentkezesController::class, 'archivalas']);
+    
+    //Egy jelentkező jelentkezéseinek állapota
+    Route::get("/jelentkezo-allapot/{jelentkezo_email}", [JelentkezesController::class, 'getJelentkezesAllapot']);
+        
+//Szak
     
 
 });
