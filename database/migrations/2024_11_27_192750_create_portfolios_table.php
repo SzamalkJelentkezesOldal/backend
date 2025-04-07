@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('jelentkezo_id')->references('id')->on('jelentkezos');
             $table->foreignId('szak_id')->references('id')->on('szaks');
             $table->string('portfolio_url');
-            $table->tinyInteger('allapot'); // 1 - eldöntésre vár, 2 - elfogadva, 3 - elutasítva
+            $table->tinyInteger('allapot')->references('id')->on('allapotszotars'); 
             $table->timestamps();
         
             // Egyedi kombinációk létrehozása (indexek)

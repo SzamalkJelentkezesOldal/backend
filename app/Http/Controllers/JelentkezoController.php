@@ -60,7 +60,7 @@ class JelentkezoController extends Controller
                     $portfolio->jelentkezo_id = $jelentkezo->id;
                     $portfolio->portfolio_url = $portfolioSzak['portfolio_url'];
                     $portfolio->szak_id = $portfolioSzak['szak_id'];
-                    $portfolio->allapot = 1;
+                    $portfolio->allapot = 5;
                     $portfolio->save();
                 }
             }
@@ -185,7 +185,7 @@ class JelentkezoController extends Controller
                 ? $applicant->portfolios->map(function($pf) {
                     return [
                         'id' => $pf->id,
-                        'szak_id' => $pf->szak_id,
+                        'szak' => $pf->szak->elnevezes,
                         'portfolio_url' => $pf->portfolio_url,
                         'allapot' => $pf->allapot,
                         'created_at' => $pf->created_at,
