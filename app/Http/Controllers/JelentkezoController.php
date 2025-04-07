@@ -60,6 +60,7 @@ class JelentkezoController extends Controller
                     $portfolio->jelentkezo_id = $jelentkezo->id;
                     $portfolio->portfolio_url = $portfolioSzak['portfolio_url'];
                     $portfolio->szak_id = $portfolioSzak['szak_id'];
+                    $portfolio->allapot = 1;
                     $portfolio->save();
                 }
             }
@@ -75,139 +76,182 @@ class JelentkezoController extends Controller
             ], 500);
         }
     }
+
+
     public function index(Request $request)
-{
-    $page   = $request->input('page', 1);
-    $limit  = $request->input('limit', 10);
-    $filter = $request->input('filter', 1); // 1 = Összes jelentkező, 2 = Csak jelentkezett, 3 = Beiratkozás alatt
-    $search = $request->input('search', '');
-    $searchField = $request->input('searchField', ''); 
+    {
+        $page   = $request->input('page', 1);
+        $limit  = $request->input('limit', 10);
+        $filter = $request->input('filter', 1); // 1 = Összes jelentkező, 2 = Csak jelentkezett, 3 = Beiratkozás alatt
+        $search = $request->input('search', '');
+        $searchField = $request->input('searchField', ''); 
 
-    $query = Jelentkezo::query()
-        ->select('id', 'nev', 'email', 'created_at')
-        ->with([
-            'user:id,email,created_at',
-            'jelentkezesek' => function($q) {
-                $q->select('id', 'jelentkezo_id', 'allapot', 'sorrend', 'szak_id', 'updated_at')
-                  ->orderBy('sorrend', 'asc')
-                  ->with(['allapotszotar', 'szak']);
-            },
-            'torzsadatok',
-            'dokumentumok',
-            'portfolios' // itt kérjük le a portfóliókat is
-        ]);
+        $query = Jelentkezo::query()
+            ->select('id', 'nev', 'tel', 'email', 'created_at')
+            ->with([
+                'user:id,email,created_at',
+                'jelentkezesek' => function($q) {
+                    $q->select('id', 'jelentkezo_id', 'allapot', 'sorrend', 'szak_id', 'updated_at')
+                    ->orderBy('sorrend', 'asc')
+                    ->with(['allapotszotar', 'szak']);
+                },
+                'torzsadatok',
+                'dokumentumok',
+                'portfolios'
+            ]);
 
-    if (!empty($search)) {
-        if (!empty($searchField) && in_array($searchField, ['nev', 'email'])) {
-            $query->where($searchField, 'like', "%{$search}%");
-        } else {
-            $query->where(function($q) use ($search) {
-                $q->where('nev', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
-            });
+        if (!empty($search)) {
+            if (!empty($searchField) && in_array($searchField, ['nev', 'email'])) {
+                $query->where($searchField, 'like', "%{$search}%");
+            } else {
+                $query->where(function($q) use ($search) {
+                    $q->where('nev', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+                });
+            }
         }
-    }
-
-    if ($filter == 2) {
-        $query->whereNotIn('email', function($q) {
-            $q->select('email')->from('users');
-        });
-    } elseif ($filter == 3) {
-        $query->whereIn('email', function($q) {
-            $q->select('email')->from('users');
-        });
-    }
-
-    $totalCount = $query->count();
-    $applicants = $query->skip(($page - 1) * $limit)->take($limit)->get();
-
-    if ($filter == 1) {
-        $userEmails = DB::table('users')->pluck('email')->toArray();
-    } else {
-        $userEmails = ($filter == 3) ? $applicants->pluck('email')->toArray() : [];
-    }
-
-    $results = $applicants->map(function ($applicant) use ($filter, $userEmails) {
-        $statuses = $applicant->jelentkezesek->map(function($j) {
-            return optional($j->allapotszotar)->elnevezes;
-        })->toArray();
 
         if ($filter == 2) {
-            $overallStatus = 'Jelentkezett';
-        } elseif ($filter == 1) {
-            if (!in_array($applicant->email, $userEmails)) {
-                $overallStatus = 'Jelentkezett';
-            } else {
-                $overallStatus = $this->osszefoglaltStatusz($statuses);
-            }
+            $query->whereNotIn('email', function($q) {
+                $q->select('email')->from('users');
+            });
         } elseif ($filter == 3) {
-            $overallStatus = $this->osszefoglaltStatusz($statuses);
+            $query->whereIn('email', function($q) {
+                $q->select('email')->from('users');
+            });
         }
 
-        $torzsadatok = in_array($applicant->email, $userEmails) ? $applicant->torzsadatok : null;
+        $totalCount = $query->count();
+        $applicants = $query->skip(($page - 1) * $limit)->take($limit)->get();
 
-        $dokumentumok = in_array($applicant->email, $userEmails) ? $applicant->dokumentumok->map(function($doc) {
-            $files = $doc->fajlok;
-            if (!is_array($files)) {
-                $files = json_decode($files, true) ?: [];
+        if ($filter == 1) {
+            $userEmails = DB::table('users')->pluck('email')->toArray();
+        } else {
+            $userEmails = ($filter == 3) ? $applicants->pluck('email')->toArray() : [];
+        }
+
+        $results = $applicants->map(function ($applicant) use ($filter, $userEmails) {
+            $statuses = $applicant->jelentkezesek->map(function($j) {
+                return optional($j->allapotszotar)->elnevezes;
+            })->toArray();
+
+            if ($filter == 2) {
+                $overallStatus = 'Jelentkezett';
+            } elseif ($filter == 1) {
+                if (!in_array($applicant->email, $userEmails)) {
+                    $overallStatus = 'Jelentkezett';
+                } else {
+                    $overallStatus = $this->osszefoglaltStatusz($statuses);
+                }
+            } elseif ($filter == 3) {
+                $overallStatus = $this->osszefoglaltStatusz($statuses);
             }
-            $previewUrls = array_map(function($file) {
-                return route('dokumentum.preview', ['path' => $file]);
-            }, $files);
+
+            $torzsadatok = in_array($applicant->email, $userEmails) ? $applicant->torzsadatok : null;
+
+            $dokumentumok = in_array($applicant->email, $userEmails) ? $applicant->dokumentumok->map(function($doc) {
+                $files = $doc->fajlok;
+                if (!is_array($files)) {
+                    $files = json_decode($files, true) ?: [];
+                }
+                $previewUrls = array_map(function($file) {
+                    return route('dokumentum.preview', ['path' => $file]);
+                }, $files);
+
+                return [
+                    'id' => $doc->id,
+                    'dokumentumTipus' => $doc->tipus ? $doc->tipus->elnevezes : null,
+                    'fajlok' => $files,
+                    'previewUrls' => $previewUrls,
+                    'created_at' => $doc->created_at,
+                ];
+            })->toArray() : null;
+
+            $jelentkezesek = $applicant->jelentkezesek->map(function($j) {
+                return [
+                    'id' => $j->id,
+                    'sorrend' => $j->sorrend,
+                    'updated_at' => $j->updated_at,
+                    'allapotszotar' => $j->allapotszotar,
+                    'allapot' => $j->allapot,
+                    'jelentkezo_id' => $j->jelentkezo_id,
+                    'szak_id' => $j->szak->id,
+                    'szak' => $j->szak->elnevezes,
+                    'tagozat' => $j->szak->nappali,
+                ];
+            });
+
+            $portfoliok = $applicant->portfolios && $applicant->portfolios->count()
+                ? $applicant->portfolios->map(function($pf) {
+                    return [
+                        'id' => $pf->id,
+                        'szak_id' => $pf->szak_id,
+                        'portfolio_url' => $pf->portfolio_url,
+                        'allapot' => $pf->allapot,
+                        'created_at' => $pf->created_at,
+                        'tagozat' => $pf->szak ? (int)$pf->szak->nappali : null,
+                    ];
+                })->toArray()
+                : null;
 
             return [
-                'id' => $doc->id,
-                'dokumentumTipus' => $doc->tipus ? $doc->tipus->elnevezes : null,
-                'fajlok' => $files,
-                'previewUrls' => $previewUrls,
-                'created_at' => $doc->created_at,
-            ];
-        })->toArray() : null;
-
-        $jelentkezesek = $applicant->jelentkezesek->map(function($j) {
-            return [
-                'id' => $j->id,
-                'sorrend' => $j->sorrend,
-                'updated_at' => $j->updated_at,
-                'allapotszotar' => $j->allapotszotar,
-                'allapot' => $j->allapot,
-                'szak' => $j->szak->elnevezes,
-                'tagozat' => $j->szak->nappali,
+                'id' => $applicant->id,
+                'nev' => $applicant->nev,
+                'email' => $applicant->email,
+                'tel' => $applicant->tel,
+                'beregisztralt' => $applicant->user ? $applicant->user->created_at : null,
+                'jelentkezett' => $applicant->created_at,
+                'status' => $overallStatus,
+                'jelentkezesek' => $jelentkezesek,
+                'torzsadatok' => $torzsadatok,
+                'dokumentumok' => $dokumentumok,
+                'portfolioAllapot' => $this->osszefoglaltPortfolioAllapot($portfoliok),
+                'portfoliok' => $portfoliok,
             ];
         });
 
-        $portfoliok = $applicant->portfolios && $applicant->portfolios->count()
-            ? $applicant->portfolios->map(function($pf) {
-                return [
-                    'id' => $pf->id,
-                    'szak_id' => $pf->szak_id,
-                    'portfolio_url' => $pf->portfolio_url,
-                    'created_at' => $pf->created_at,
-                ];
-            })->toArray()
-            : null;
-
-        return [
-            'id' => $applicant->id,
-            'nev' => $applicant->nev,
-            'email' => $applicant->email,
-            'beregisztralt' => $applicant->user ? $applicant->user->created_at : null,
-            'jelentkezett' => $applicant->created_at,
-            'status' => $overallStatus,
-            'jelentkezesek' => $jelentkezesek,
-            'torzsadatok' => $torzsadatok,
-            'dokumentumok' => $dokumentumok,
-            'portfoliok' => $portfoliok, 
-        ];
-    });
-
-    return response()->json([
-        'results'    => $results,
-        'totalCount' => $totalCount,
-    ]);
-}
+        return response()->json([
+            'results'    => $results,
+            'totalCount' => $totalCount,
+        ]);
+    }
 
 
+    private function osszefoglaltPortfolioAllapot($portfoliok) {
+        // Ha nincs portfólió
+        if (empty($portfoliok) || !is_array($portfoliok) || count($portfoliok) === 0) {
+            return "";
+        }
+
+        // Kinyerjük az allapot értékeket
+        $statuses = array_map(function($pf) {
+            return $pf['allapot'];
+        }, $portfoliok);
+
+        // Ha van legalább egy 2-es
+        if (in_array(2, $statuses)) {
+            return "Elfogadva";
+        }
+
+        // Ha minden 1-es
+        $allOnes = array_reduce($statuses, function($carry, $status) {
+            return $carry && ($status == 1);
+        }, true);
+        if ($allOnes) {
+            return "Eldöntésre vár";
+        }
+
+        // Ha minden 3-as
+        $allThrees = array_reduce($statuses, function($carry, $status) {
+            return $carry && ($status == 3);
+        }, true);
+        if ($allThrees) {
+            return "Elutasítva";
+        }
+
+        // Egyéb esetben is döntésre vár
+        return "Eldöntésre vár";
+    }
 
     /**
      * Az összefoglalt státusz kiszámítása a következő szabályok szerint:

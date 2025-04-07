@@ -14,6 +14,13 @@ class Portfolio extends Model
     protected $fillable = [
         'jelentkezo_id',
         'portfolio_url',
-        'szak_id'
+        'szak_id',
+        'allapot'
     ];
+
+    public function szak()
+    {
+        return $this->belongsTo(Szak::class, 'szak_id');
+    }
+
 }
