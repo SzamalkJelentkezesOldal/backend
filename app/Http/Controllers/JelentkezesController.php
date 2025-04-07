@@ -229,4 +229,31 @@ class JelentkezesController extends Controller
 
         return $jelentkezesek;
     }
+    public function archivalas(String $id){
+        try {
+            // Ellenőrizzük, hogy létezik-e a jelentkező az adott ID-val
+            $jelentkezo = DB::table('jelentkezos')->find($id);
+
+            if (!$jelentkezo) {
+                return response()->json(['error' => 'Nem létező jelentkező'], 404);
+            }
+
+            // Lekérjük az "Archivált" állapot azonosítóját az allapotszotars táblából
+            $archivaltAllapot = DB::table('allapotszotars')->where('elnevezes', 'Archivált')->value('id');
+
+            if (!$archivaltAllapot) {
+                return response()->json(['error' => 'Archivált állapot nem található'], 500);
+            }
+
+            // Frissítjük a jelentkezések állapotát az adott jelentkezőhöz
+            DB::table('jelentkezes')
+                ->where('jelentkezo_id', $id)
+                ->update(['allapot' => $archivaltAllapot]);
+
+            return response()->json(['message' => 'Jelentkezések archiválása sikeres']);
+        } catch (\Exception $e) {
+            Log::error('HIBA: ' . $e->getMessage());
+            return response()->json(['error' => 'Váratlan hiba történt'], 500);
+        }
+    }
 }
