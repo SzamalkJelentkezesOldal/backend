@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\JelentkezoRequest;
 use App\Mail\JelentkezoMail;
+use App\Mail\PortfolioMegerositesMail;
 use App\Models\Jelentkezes;
 use App\Models\Jelentkezo;
 use App\Models\Portfolio;
@@ -40,7 +41,6 @@ class JelentkezoController extends Controller
 
             $regisztraciosLink = url("http://localhost:3000/register/{$token}");
 
-            Mail::to($request->jelentkezo['email'])->send(new JelentkezoMail($request->jelentkezo['nev'], $regisztraciosLink));
 
             //jelentkezesbe
             foreach ($request->jelentkezes['kivalasztottSzakok'] as $index => $szakId) {
@@ -60,9 +60,13 @@ class JelentkezoController extends Controller
                     $portfolio->jelentkezo_id = $jelentkezo->id;
                     $portfolio->portfolio_url = $portfolioSzak['portfolio_url'];
                     $portfolio->szak_id = $portfolioSzak['szak_id'];
-                    $portfolio->allapot = 5;
+                    $portfolio->allapot = 'Eldöntésre vár';
                     $portfolio->save();
                 }
+                Mail::to($request->jelentkezo['email'])->send(new PortfolioMegerositesMail($request->jelentkezo['nev']));
+
+            } else {
+                Mail::to($request->jelentkezo['email'])->send(new JelentkezoMail($request->jelentkezo['nev'], $regisztraciosLink));
             }
 
             return response()->json([
@@ -218,40 +222,42 @@ class JelentkezoController extends Controller
 
 
     private function osszefoglaltPortfolioAllapot($portfoliok) {
-        // Ha nincs portfólió
+        // Ha nincs portfólió, akkor üres értéket adunk vissza.
         if (empty($portfoliok) || !is_array($portfoliok) || count($portfoliok) === 0) {
             return "";
         }
-
-        // Kinyerjük az allapot értékeket
+        
+        // Kinyerjük az összes portfólió állapotát
         $statuses = array_map(function($pf) {
             return $pf['allapot'];
         }, $portfoliok);
-
-        // Ha van legalább egy 2-es
-        if (in_array(2, $statuses)) {
-            return "Elfogadva";
-        }
-
-        // Ha minden 1-es
-        $allOnes = array_reduce($statuses, function($carry, $status) {
-            return $carry && ($status == 1);
-        }, true);
-        if ($allOnes) {
+        
+        // Ha bármelyik portfólió "Eldöntésre vár" állapotban van, az összesített állapot legyen "Eldöntésre vár"
+        if (in_array("Eldöntésre vár", $statuses)) {
             return "Eldöntésre vár";
         }
-
-        // Ha minden 3-as
-        $allThrees = array_reduce($statuses, function($carry, $status) {
-            return $carry && ($status == 3);
-        }, true);
-        if ($allThrees) {
+        
+        // Ha nincs "Eldöntésre vár", és van legalább egy "Elfogadva", akkor az összesített állapot legyen "Elfogadva"
+        if (in_array("Elfogadva", $statuses)) {
+            return "Elfogadva";
+        }
+        
+        // Ha nincs pending és az összes portfólió "Elutasítva" (vagy legalább egyik sem "Elfogadva"), akkor az összesített állapot legyen "Elutasítva"
+        $allRejected = true;
+        foreach ($statuses as $status) {
+            if ($status !== "Elutasítva") {
+                $allRejected = false;
+                break;
+            }
+        }
+        if ($allRejected) {
             return "Elutasítva";
         }
-
-        // Egyéb esetben is döntésre vár
+        
+        // Egyéb esetben az állapot legyen "Eldöntésre vár"
         return "Eldöntésre vár";
     }
+    
 
     /**
      * Az összefoglalt státusz kiszámítása a következő szabályok szerint:

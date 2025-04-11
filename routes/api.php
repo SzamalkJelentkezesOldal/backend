@@ -6,6 +6,7 @@ use App\Http\Controllers\JelentkezesController;
 use App\Http\Controllers\JelentkezoController;
 use App\Http\Controllers\JelentkezoTorzsController;
 use App\Http\Controllers\ModositasKerelemMailController;
+use App\Http\Controllers\PortfolioController;
 use App\Http\Controllers\SzakController;
 use App\Http\Controllers\UgyintezoController;
 use App\Http\Middleware\Master;
@@ -99,6 +100,12 @@ Route::middleware(['auth:sanctum', Ugyintezo::class])
 
     //Módosítás kérelem email küldése
     Route::post('/modositas-kerelem-email', [ModositasKerelemMailController::class, 'emailKuldes']);
+
+    //Módosítás kérelem email küldése
+    Route::post('/portfolio-osszegzo/{id}', [PortfolioController::class, 'portfolioOsszegzoEmail']);
+
+    //Módosítás kérelem email küldése
+    Route::patch('/portfolio/{id}', [PortfolioController::class, 'updatePortfolio']);
 
     // jelentkezés elfogadásas/elutasítása
     Route::patch('/jelentkezes-eldontese/{id}/{ujAllapot}', [JelentkezesController::class, 'jelentkezesEldontese']);

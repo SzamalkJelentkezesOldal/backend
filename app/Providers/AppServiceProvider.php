@@ -5,10 +5,12 @@ namespace App\Providers;
 use App\Models\Dokumentumok;
 use App\Models\Jelentkezes;
 use App\Models\JelentkezoTorzs;
+use App\Models\Portfolio;
 use App\Models\User;
 use App\Observers\DokumentumokObserver;
 use App\Observers\JelentkezesObserver;
 use App\Observers\JelentkezoTorzsObserver;
+use App\Observers\PortfolioObserver;
 use App\Observers\UserObserver;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\App;
@@ -37,6 +39,7 @@ class AppServiceProvider extends ServiceProvider
             User::observe(UserObserver::class);
             JelentkezoTorzs::observe(JelentkezoTorzsObserver::class);
             Dokumentumok::observe(DokumentumokObserver::class);
+            // Portfolio::observe(PortfolioObserver::class);
         }
     }
 }
