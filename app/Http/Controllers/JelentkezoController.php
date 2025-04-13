@@ -192,6 +192,7 @@ class JelentkezoController extends Controller
                         'szak' => $pf->szak->elnevezes,
                         'portfolio_url' => $pf->portfolio_url,
                         'allapot' => $pf->allapot,
+                        'ertesito' => $pf->ertesito,
                         'created_at' => $pf->created_at,
                         'tagozat' => $pf->szak ? (int)$pf->szak->nappali : null,
                     ];

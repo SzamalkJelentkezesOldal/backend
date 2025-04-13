@@ -15,11 +15,13 @@
 </head>
 <body>
 <div class="container">
-    <h1>Tisztelt {{ $jelentkezo->nev }},</h1>
+    <h1>Portfólió értékelési összegzés</h1>
+
+    <h2>Tisztelt {{ $jelentkezo->nev }},</h2> 
     <p>A portfóliód értékelése befejeződött. Az alábbiakban láthatod az eredményeket:</p>
     
     @if($elfogadottPortfoliok->count())
-        <h2>Elfogadott portfóliók:</h2>
+        <h3>Elfogadott portfóliók:</h3>
         <ul>
             @foreach($elfogadottPortfoliok as $pf)
                 <li>{{ $pf->szak->elnevezes }} – <a href="{{ $pf->portfolio_url }}" target="_blank">{{ $pf->portfolio_url }}</a></li>
@@ -28,7 +30,7 @@
     @endif
 
     @if($elutasitottPortfoliok->count())
-        <h2>Elutasított portfóliók:</h2>
+        <h3>Elutasított portfóliók:</h3>
         <ul>
             @foreach($elutasitottPortfoliok as $pf)
                 <li>{{ $pf->szak->elnevezes }} – <a href="{{ $pf->portfolio_url }}" target="_blank">{{ $pf->portfolio_url }}</a></li>
@@ -41,7 +43,7 @@
         <p><a href="{{ $registrationLink }}" target="_blank">{{ $registrationLink }}</a></p>
     </div>
 
-    <p>Ha kérdésed van, kérjük lépj kapcsolatba az ügyfélszolgálattal.</p>
+    <p>Ha kérdésed van, kérjük lépj kapcsolatba a titkársággal.</p>
     <p>Köszönettel,<br>SZÁMALK-Szalézi Technikum és Szkg.</p>
 </div>
 </body>

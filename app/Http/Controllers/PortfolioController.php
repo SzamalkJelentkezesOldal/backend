@@ -37,6 +37,11 @@ class PortfolioController extends Controller
             Mail::to($jelentkezo->email)
                 ->send(new JelentkezoElutasitottMail($jelentkezo->nev));
         }
+
+        foreach ($portfoliok as $pf) {
+            $pf->ertesito = true;
+            $pf->save();
+        }
     
         return response()->json(['message' => 'Összegző email sikeresen elküldve.']);
     }

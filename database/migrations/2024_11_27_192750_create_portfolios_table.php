@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('szak_id')->references('id')->on('szaks');
             $table->string('portfolio_url');
             $table->enum('allapot', ['Eldöntésre vár', 'Elfogadva', 'Elutasítva'])->default('Eldöntésre vár');
+            $table->boolean('ertesito')->default(false);
             $table->timestamps();
         
             // Egyedi kombinációk létrehozása (indexek)
