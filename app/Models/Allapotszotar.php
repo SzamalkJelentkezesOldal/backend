@@ -10,4 +10,5 @@ class Allapotszotar extends Model
     /** @use HasFactory<\Database\Factories\AllapotszotarFactory> */
     use HasFactory;
     protected $fillable = ['elnevezes'];
+
 }

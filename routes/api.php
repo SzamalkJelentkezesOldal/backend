@@ -22,8 +22,6 @@ Route::get('/szakok-szama/{id}', [JelentkezesController::class, 'countJelentkeze
 Route::get('/jelentkezo-adatai/{email}', [JelentkezoTorzsController::class, 'getJelentkezoAdatok']);
 
 
-
-
 // Jelentkező
 Route::middleware(['auth:sanctum'])
     ->group(function () {
@@ -74,57 +72,57 @@ Route::middleware(['auth:sanctum', Ugyintezo::class])
     
     //jelentkezes állapotának módosítása
 
-    //kik jelentkeztek arra a szakra
+    //kik jelentkeztek arra a szakra 
     Route::get("/szakra-jelentkezett/{szak}", [SzakController::class, 'getJelentkezokSzakra']);
 
-    //hanyan jelentkeztek arra a szakra
+    //hanyan jelentkeztek arra a szakra 
     Route::get("/jelentkezok-szama/{szak}", [SzakController::class, 'jelentkezokSzamaSzakra']);
 
-    //csak nappali tagozatra jelentkeztek
+    //csak nappali tagozatra jelentkeztek 
     Route::get("/nappali-jelentkezok", [JelentkezoController::class, 'nappaliJelentkezok']);
 
-    //csak esti tagozatra jelentkeztek
+    //csak esti tagozatra jelentkeztek 
     Route::get("/esti-jelentkezok", [JelentkezoController::class, 'estiJelentkezok']);
 
-    //csak bizonyos tagozatra jelentkeztek
+    //csak bizonyos tagozatra jelentkeztek 
     Route::get("/tagozat-jelentkezok/{szam}", [JelentkezoController::class, 'csakEgyTagozatraJelentkezett']);
 
-    //hány jelentkezőnek van elfogadva a státusza
+    //hány jelentkezőnek van elfogadva a státusza 
     Route::get("/statusz-elfogadva", [JelentkezesController::class, 'elfogadottakSzakonkent']);
 
-    //Nyilatkozat feltöltése
+    //Nyilatkozat feltöltése 
     Route::post('/nyilatkozat-feltoltes', [DokumentumokController::class, 'nyilatkozatFeltolt']);
 
-    //Állapot változás
+    //Állapot változás 
     Route::patch('/allapot-valtozas', [JelentkezesController::class, 'allapotValtozas']);
 
-    //Módosítás kérelem email küldése
+    //Módosítás kérelem email küldése 
     Route::post('/modositas-kerelem-email', [ModositasKerelemMailController::class, 'emailKuldes']);
 
-    //Módosítás kérelem email küldése
+    // Egy portfólió összegzésének kiküldése emailben 
     Route::post('/portfolio-osszegzo/{id}', [PortfolioController::class, 'portfolioOsszegzoEmail']);
 
-    //Módosítás kérelem email küldése
+    // Módosítunk egy pórtfólió állapotot 
     Route::patch('/portfolio/{id}', [PortfolioController::class, 'updatePortfolio']);
-
-    // jelentkezés elfogadásas/elutasítása
+ 
+    // jelentkezés elfogadásas/elutasítása 
     Route::patch('/jelentkezes-eldontese/{id}/{ujAllapot}', [JelentkezesController::class, 'jelentkezesEldontese']);
 
     /* ----------------------- Statisztika -----------------------*/
 
-    //hanyan jelentkeztek szakokra bontva
+    //hanyan jelentkeztek szakokra bontva 
     Route::get("/jelentkezok-szama-statisztika", [SzakController::class, 'jelentkezokSzamaSzakraStat']);
 
-    //hanyan jelentkeztek nappali illetve esti tagozat-ra szakokra bontva
+    //hanyan jelentkeztek nappali illetve esti tagozat-ra szakokra bontva 
     Route::get("/jelentkezok-tagozatra-szakra-bontva", [SzakController::class, 'jelentkezokTagozatonkentSzakonkent']);
 
-    //hanyan jelentkeztek nappali illetve esti tagozat-ra bontva
+    //hanyan jelentkeztek nappali illetve esti tagozat-ra bontva 
     Route::get("/jelentkezok-tagozatra-bontva", [SzakController::class, 'jelentkezokTagozatonkent']);
 
-    //jelentkezok közül hányat fogadtunk el, össz
+    //jelentkezok közül hányat fogadtunk el, össz 
     Route::get("/jelentkezok-osszesen-elfogadva", [JelentkezesController::class, 'elfogadottakSzama']);
 
-    //jelentkezok közül hányat fogadtunk el, szakokra bontva
+    //jelentkezok közül hányat fogadtunk el, szakokra bontva 
     Route::get("/jelentkezok-szakonkent-elfogadva", [JelentkezesController::class, 'elfogadottakSzamaSzakonkent']);
 
     //Havi regisztrációk száma a jelenlegi évben

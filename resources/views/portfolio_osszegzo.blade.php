@@ -11,6 +11,18 @@
         ul { list-style: none; padding: 0; }
         li { margin-bottom: 5px; }
         .registration-link { margin-top: 20px; }
+        .register-btn {
+      display: inline-block;
+      background-color: #00848b;
+      color: white !important;
+      text-decoration: none;
+      padding: 12px 20px;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+    .register-btn:hover {
+      background-color: #00707d;
+    }
     </style>
 </head>
 <body>
@@ -39,8 +51,8 @@
     @endif
 
     <div class="registration-link">
-        <p>Mivel legalább egy portfóliód elfogadásra került, folytathatod a regisztrációt az alábbi linkre kattintva:</p>
-        <p><a href="{{ $registrationLink }}" target="_blank">{{ $registrationLink }}</a></p>
+        <p>Mivel legalább egy portfóliód elfogadásra került, folytathatod a regisztrációt az alábbi gombra kattintva:</p>
+        <p><a href="{{ $registrationLink }}" target="_blank" class="register-btn">Regisztráció</a></p>
     </div>
 
     <p>Ha kérdésed van, kérjük lépj kapcsolatba a titkársággal.</p>
