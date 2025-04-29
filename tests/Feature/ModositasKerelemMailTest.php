@@ -8,13 +8,13 @@ use Tests\TestCase;
 use App\Models\User;
 use App\Models\Jelentkezo;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\ModositasKerelemMail; // Assuming this mail class exists
+use App\Mail\ModositasKerelemMail; 
 
 class ModositasKerelemMailTest extends TestCase
 {
     use RefreshDatabase;
 
-    // Tests for ModositasKerelemMailController endpoints will be added here
+    
 
     public function test_post_modositas_kerelem_email()
     {
@@ -28,7 +28,7 @@ class ModositasKerelemMailTest extends TestCase
         ]);
 
         $response->assertStatus(200);
-        // Assert email was sent
+        
         Mail::assertSent(ModositasKerelemMail::class, function ($mail) use ($jelentkezo) {
             return $mail->hasTo($jelentkezo->email);
         });

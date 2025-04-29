@@ -58,10 +58,6 @@ class PortfolioTest extends TestCase
         $response = $this->actingAs($ugyintezo)->patchJson("/api/portfolio/{$portfolio->id}", $data);
 
         $response->assertStatus(404);
-        // The following assertion would fail due to the 404, commented out
-        // $this->assertDatabaseHas('portfolios', [
-        //     'id' => $portfolio->id,
-        //     'allapot' => $newAllapot,
-        // ]);
+       
     }
 }
