@@ -14,17 +14,11 @@ use Illuminate\Support\Facades\Validator;
 
 class JelentkezesController extends Controller
 {
-    public function countJelentkezesSzama(String $id)
+    public function countJelentkezesSzama($jelentkezo_id)
     {
-        $jelentkezo = Jelentkezo::with('jelentkezesek');
-
-        // Jelentkezések számának meghatározása
-        $szakokSzama = $jelentkezo->jelentkezesek->count();
-
-        return response()->json([
-            'jelentkezo_id' => $id,
-            'jelentkezesek_szama' => $szakokSzama
-        ]);
+        $jelentkezo = Jelentkezo::findOrFail($jelentkezo_id);
+        $count = $jelentkezo->jelentkezesek()->count(); 
+        return response()->json($count, 200); 
     }
 
     public function elfogadottakSzakonkent()
@@ -73,7 +67,7 @@ class JelentkezesController extends Controller
         ]);
     }
 
-    public function getJelentkezesek(String $email)
+    public function getJelentkezesek($email)
     {
         $jelentkezoId = DB::table('jelentkezos')->where('email', $email)->value('id');
 

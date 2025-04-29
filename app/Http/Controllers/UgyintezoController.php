@@ -6,29 +6,32 @@ use App\Models\Ugyintezo;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class UgyintezoController extends Controller
 {
     //
     public function postUgyintezo(Request $request)
     {
-        $ellenorzottAdatok = $request->validate([
+        $validator = Validator::make($request->all(), [
             'nev' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'jelszo' => 'required|string|min:6',
-            'jelszoMegerosites' => 'required|same:jelszo',
-            'master' => 'boolean',
+            'email' => 'required|string|email|max:255|unique:users',
+            'jelszo' => 'required|string|min:8',
+            'jelszoMegerosites' => 'required|string|same:jelszo',
         ]);
 
-   
-        $ujUgyintezo = User::create([
-            'name' => $ellenorzottAdatok['nev'],
-            'email' => $ellenorzottAdatok['email'],
-            'password' => Hash::make($ellenorzottAdatok['jelszo']),
-            'role' => $ellenorzottAdatok['master'] ? 2 : 1, 
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $user = User::create([
+            'name' => $request->nev,
+            'email' => $request->email,
+            'password' => Hash::make($request->jelszo),
+            'role' => 1, // Assign role 1 for Ugyintezo
         ]);
 
-        return response()->json($ujUgyintezo);
+        return response()->json($user, 201);
     }
 
     public function getUgyintezok()

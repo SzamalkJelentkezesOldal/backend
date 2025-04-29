@@ -73,7 +73,7 @@ Route::middleware(['auth:sanctum', Ugyintezo::class])
     //jelentkezes állapotának módosítása
 
     //kik jelentkeztek arra a szakra 
-    Route::get("/szakra-jelentkezett/{szak}", [SzakController::class, 'getJelentkezokSzakra']);
+    Route::get("/szakra-jelentkezett/{szak_elnevezes}", [SzakController::class, 'getJelentkezokSzakra']);
 
     //hanyan jelentkeztek arra a szakra 
     Route::get("/jelentkezok-szama/{szak}", [SzakController::class, 'jelentkezokSzamaSzakra']);
