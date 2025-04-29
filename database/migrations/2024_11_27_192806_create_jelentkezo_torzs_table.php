@@ -28,19 +28,19 @@ return new class extends Migration
             $table->timestamps();
         });
 
-       /* JelentkezoTorzs::create([
-            'jelentkezo_id' => 1, // A megadott jelentkezo_id
-            'vezeteknev' => 'Kovács',
-            'keresztnev' => 'János',
-            'adoazonosito' => '1234567890',
-            'lakcim' => 'Budapest, Fő utca 1.',
-            'taj_szam' => '987654321',
-            'szuletesi_hely' => 'Debrecen',
-            'szuletesi_nev' => 'Kovács János',
-            'szuletesi_datum' => '1999-07-15',
-            'allampolgarsag' => 'magyar',
-            'anyja_neve' => 'Nagy Ilona',
-        ]);*/
+    //    JelentkezoTorzs::create([
+    //         'jelentkezo_id' => 1, 
+    //         'vezeteknev' => 'Teszt',
+    //         'keresztnev' => 'Felhasználó',
+    //         'adoazonosito' => '1234567890',
+    //         'lakcim' => 'Budapest, Fő utca 1.',
+    //         'taj_szam' => '987654321',
+    //         'szuletesi_hely' => 'Debrecen',
+    //         'szuletesi_nev' => 'Teszt Felhasználó',
+    //         'szuletesi_datum' => '1999-07-15',
+    //         'allampolgarsag' => 'magyar',
+    //         'anyja_neve' => 'Teszt Anyja',
+    //     ]);
     }
 
     /**
