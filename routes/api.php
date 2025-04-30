@@ -41,6 +41,9 @@ Route::middleware(['auth:sanctum'])
     // egy jelentkezőnek a szakokra való jelentkezését listázza
     Route::get('/jelentkezesek/{jelentkezo}', [JelentkezesController::class, 'getJelentkezesek']);
 
+    // egy jelentkezőnek a jelentkezéseit "Eldöntésre vár" állapotra állítja
+    Route::patch('/modositas-vegrehajtas/{email}', [JelentkezesController::class, 'modositasVegrehajtas']);
+
     // egy jelentkezőnek a szakokra való jelentkezésének sorrendjét módosítja/beiratkozik
     Route::patch('/jelentkezesek/sorrend/{jelentkezo}/{beiratkozik}', [JelentkezesController::class, 'updateSorrend']);
 

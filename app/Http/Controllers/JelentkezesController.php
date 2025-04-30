@@ -79,6 +79,52 @@ class JelentkezesController extends Controller
         return response()->json($jelentkezesek);
     }
 
+    public function modositasVegrehajtas($email) {
+        try {
+            // Find jelentkezo_id by email
+            $jelentkezo = DB::table('jelentkezos')->where('email', $email)->first();
+
+            if (!$jelentkezo) {
+                return response()->json(['error' => 'Nem található jelentkező ezzel az email címmel'], 404);
+            }
+
+            $modositasraVarId = AllapotHelper::getId("Módosításra vár");
+            $eldontesreVarId = AllapotHelper::getId("Eldöntésre vár");
+
+            $jelentkezesek = Jelentkezes::where('jelentkezo_id', $jelentkezo->id)
+                ->where('allapot', $modositasraVarId)
+                ->get();
+
+            if ($jelentkezesek->isEmpty()) {
+                return response()->json(['message' => 'Nincsenek módosításra váró jelentkezések'], 200);
+            }
+
+            foreach ($jelentkezesek as $jelentkezes) {
+                $regiAllapot = $jelentkezes->allapot;
+                
+                $jelentkezes->allapot = $eldontesreVarId;
+                $jelentkezes->save();
+
+                Statuszvaltozas::create([
+                    'jelentkezo_id' => $jelentkezo->id,
+                    'szak_id' => $jelentkezes->szak_id,
+                    'regi_allapot' => $regiAllapot,
+                    'uj_allapot' => $eldontesreVarId,
+                    'user_id' => null,
+                ]);
+            }
+
+            return response()->json([
+                'message' => 'Jelentkezések állapota sikeresen frissítve',
+                'jelentkezesek_szama' => $jelentkezesek->count()
+            ], 200);
+            
+        } catch (\Exception $e) {
+            Log::error('HIBA: ' . $e->getMessage());
+            return response()->json(['error' => 'Váratlan hiba történt: ' . $e->getMessage()], 500);
+        }
+    }
+
     public function updateSorrend(Request $request, $jelentkezo, $beiratkozik)
     {
         try {

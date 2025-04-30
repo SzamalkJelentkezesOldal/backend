@@ -16,6 +16,7 @@ class Jelentkezes extends Model
         'jelentkezo_id',
         'allapot',
         'sorrend',
+        'lezart',
     ];
 
     public function jelentkezo(){

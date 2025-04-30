@@ -17,8 +17,10 @@ return new class extends Migration
             $table->foreignId('jelentkezo_id')->references('id')->on('jelentkezos');
             $table->foreignId('szak_id')->references('id')->on('szaks');
             $table->foreignId('allapot')->references('id')->on('allapotszotars');
-            $table->tinyInteger("sorrend")->default(0);
+            $table->tinyInteger('sorrend')->default(0);
+            $table->boolean('lezart')->default(false);
             $table->timestamps();
+
 
             $table->unique(['jelentkezo_id', 'szak_id']);
         });
