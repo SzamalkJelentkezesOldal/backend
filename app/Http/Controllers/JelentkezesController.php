@@ -125,6 +125,32 @@ class JelentkezesController extends Controller
         }
     }
 
+    public function jelentkezesLezaras($jelentkezo) {
+        try {
+            $jelentkezoId = $jelentkezo;
+            
+            $jelentkezesek = Jelentkezes::where('jelentkezo_id', $jelentkezoId)->get();
+            
+            if ($jelentkezesek->isEmpty()) {
+                return response()->json(['message' => 'Nincsenek jelentkezések'], 200);
+            }
+            
+            foreach ($jelentkezesek as $jelentkezes) {
+                $jelentkezes->lezart = true;
+                $jelentkezes->save();
+            }
+            
+            return response()->json([
+                'message' => 'Jelentkezések sikeresen lezárva',
+                'jelentkezesek_szama' => $jelentkezesek->count()
+            ], 200);
+            
+        } catch (\Exception $e) {
+            Log::error('HIBA: ' . $e->getMessage());
+            return response()->json(['error' => 'Váratlan hiba történt: ' . $e->getMessage()], 500);
+        }
+    }
+
     public function updateSorrend(Request $request, $jelentkezo, $beiratkozik)
     {
         try {

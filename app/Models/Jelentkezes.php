@@ -19,6 +19,10 @@ class Jelentkezes extends Model
         'lezart',
     ];
 
+    protected $casts = [
+        'lezart' => 'boolean',
+    ];
+
     public function jelentkezo(){
         return $this->belongsTo(Jelentkezo::class,'jelentkezo_id','id');
     }

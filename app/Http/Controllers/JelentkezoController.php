@@ -95,7 +95,7 @@ class JelentkezoController extends Controller
             ->with([
                 'user:id,email,created_at',
                 'jelentkezesek' => function($q) {
-                    $q->select('id', 'jelentkezo_id', 'allapot', 'sorrend', 'szak_id', 'updated_at')
+                    $q->select('id', 'jelentkezo_id', 'allapot', 'sorrend', 'szak_id', 'updated_at', 'lezart')
                     ->orderBy('sorrend', 'asc')
                     ->with(['allapotszotar', 'szak']);
                 },
@@ -182,6 +182,7 @@ class JelentkezoController extends Controller
                     'szak_id' => $j->szak->id,
                     'szak' => $j->szak->elnevezes,
                     'tagozat' => $j->szak->nappali,
+                    'lezart' => $j->lezart,
                 ];
             });
 
