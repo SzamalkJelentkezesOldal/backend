@@ -11,6 +11,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\JelentkezoSikeresMail;
+use App\Mail\JelentkezoElutasitottMail;
 
 class JelentkezesController extends Controller
 {
@@ -129,20 +132,54 @@ class JelentkezesController extends Controller
         try {
             $jelentkezoId = $jelentkezo;
             
-            $jelentkezesek = Jelentkezes::where('jelentkezo_id', $jelentkezoId)->get();
+            $jelentkezesek = Jelentkezes::where('jelentkezo_id', $jelentkezoId)
+                ->with(['szak', 'allapotszotar'])
+                ->get();
             
             if ($jelentkezesek->isEmpty()) {
                 return response()->json(['message' => 'Nincsenek jelentkezések'], 200);
             }
             
+            // Lezárjuk a jelentkezéseket
             foreach ($jelentkezesek as $jelentkezes) {
                 $jelentkezes->lezart = true;
                 $jelentkezes->save();
             }
             
+            // Megkeressük a jelentkezőt az email küldéshez
+            $jelentkezoObj = DB::table('jelentkezos')->find($jelentkezoId);
+            if (!$jelentkezoObj) {
+                return response()->json(['error' => 'Jelentkező nem található'], 404);
+            }
+            
+            // Ellenőrizzük, hogy van-e elfogadott jelentkezése
+            $elfogadottJelentkezesek = $jelentkezesek->filter(function($j) {
+                return $j->allapotszotar->elnevezes === 'Elfogadva';
+            });
+            
+            // Email küldés a jelentkezőnek
+            if ($elfogadottJelentkezesek->isNotEmpty()) {
+                // A legalacsonyabb sorrendű elfogadott szak kiválasztása
+                $legalacsonyabbSorrenduJelentkezes = $elfogadottJelentkezesek
+                    ->sortBy('sorrend')
+                    ->first();
+                
+                // Csak a legalacsonyabb sorrendű elfogadott szak neve
+                $elfogadottSzak = $legalacsonyabbSorrenduJelentkezes->szak->elnevezes;
+                
+                // Küldünk egy sikeres email-t
+                Mail::to($jelentkezoObj->email)
+                    ->send(new JelentkezoSikeresMail($jelentkezoObj->nev, [$elfogadottSzak]));
+            } else {
+                // Minden jelentkezést elutasítottak, küldünk egy elutasított email-t
+                Mail::to($jelentkezoObj->email)
+                    ->send(new JelentkezoElutasitottMail($jelentkezoObj->nev));
+            }
+            
             return response()->json([
-                'message' => 'Jelentkezések sikeresen lezárva',
-                'jelentkezesek_szama' => $jelentkezesek->count()
+                'message' => 'Jelentkezések sikeresen lezárva és értesítő email elküldve',
+                'jelentkezesek_szama' => $jelentkezesek->count(),
+                'sikeres' => $elfogadottJelentkezesek->isNotEmpty()
             ], 200);
             
         } catch (\Exception $e) {
