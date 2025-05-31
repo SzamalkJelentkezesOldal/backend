@@ -22,12 +22,12 @@ return new class extends Migration
         });
 
 
-        Jelentkezo::create([
+        /*Jelentkezo::create([
             "nev"=> "Teszt Felhasználó",
             "email"=>"felhasznalo@felhasznalo.com",
             "tel"=>'06202020200',
             "token"=>'aaaaaaaaaaaaaaaaaaaa',
-        ]);
+        ]);*/
     }
 
     /**

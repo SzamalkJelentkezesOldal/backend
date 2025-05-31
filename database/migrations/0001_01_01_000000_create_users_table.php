@@ -58,12 +58,12 @@ return new class extends Migration
             'role' => 2,
         ]);
 
-        User::create([
+        /*User::create([
             'name' => 'Felhasználó', 
             'email' => 'felhasznalo@felhasznalo.com', 
             'password' => bcrypt('asdasdasd'),
             'role' => 0,
-        ]);
+        ]);*/
     }
 
     /**
