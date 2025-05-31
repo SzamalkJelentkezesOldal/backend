@@ -25,7 +25,7 @@ return new class extends Migration
             $table->unique(['jelentkezo_id', 'szak_id']);
         });
         
-        Jelentkezes::create([
+        /*Jelentkezes::create([
             "szak_id"=>1,
             "jelentkezo_id"=>1,
             "allapot"=>2
@@ -34,7 +34,7 @@ return new class extends Migration
             "szak_id"=>9,
             "jelentkezo_id"=>1,
             "allapot"=>2
-        ]);
+        ]);*/
     }
 
     /**
